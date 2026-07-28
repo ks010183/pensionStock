@@ -1,0 +1,11 @@
+# 검증된 버전으로 고정 (버전 드리프트로 인한 컨테이너-로컬 차이 방지)
+fastapi==0.139.2
+uvicorn[standard]==0.46.0
+sqlalchemy==2.0.51
+pymysql==1.2.0
+cryptography==46.0.7    # MySQL 8 caching_sha2_password 인증에 필수
+numpy==2.4.4
+scipy==1.17.1
+mcp==1.27.0
+anyio==4.13.0
+httpx==0.28.1           # 멀티 프로바이더 LLM REST 호출 (anthropic/openai/gemini)

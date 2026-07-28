@@ -1,0 +1,44 @@
+# 연금 ETF 최적화 — 실제 ETF DB(별도 MySQL 컨테이너) 연동 구성
+#
+# 전제: 실제 etf_db 를 담은 MySQL 이 로컬에서 이미 실행 중 (root/mysql, 포트 3306)
+#       backend 컨테이너는 host.docker.internal:3306 으로 접속한다.
+#
+# 실행:  docker compose up -d --build
+# 접속:  http://localhost:8080  (웹/모바일 시뮬레이션)
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: pension-backend
+    environment:
+      ETF_DB_HOST: host.docker.internal   # 호스트에서 실행 중인 실제 MySQL
+      ETF_DB_PORT: "3306"
+      ETF_DB_USER: root
+      ETF_DB_PASSWORD: mysql
+      ETF_DB_NAME: etf_db
+      # ---- 유니버스/분류 규칙 (선택, 기본값은 backend/config.py 참조) ----
+      # UNIVERSE_REQUIRE_PENSION: "1"     # pension 값이 있는 상품만 (0 이면 전체)
+      # SAFE_FUND_TYPES: "채권형,단기금융,금리형,채권혼합형,혼합채권형"
+      # SAFE_NAME_KEYWORDS: "채권,국고채,금리,KOFR,..."
+      # MAX_SAFE_CANDIDATES: "10"
+      # ---- LLM 설정 (선택) — 키가 하나도 없으면 전체 규칙기반으로 동작 ----
+      # ANTHROPIC_API_KEY: sk-ant-...
+      # OPENAI_API_KEY: sk-...
+      # GEMINI_API_KEY: AIza...
+      # LLM_PROVIDER: auto              # auto | anthropic | openai | gemini | none
+      # AGENT_LLM_INPUT: openai:gpt-5.4-mini
+      # AGENT_LLM_EVALUATION: gemini:gemini-3.6-flash
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux 호환 (macOS/Windows 는 기본 제공)
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: pension-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8888:80"

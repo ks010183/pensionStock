@@ -101,9 +101,24 @@ def list_etfs():
 
 @app.get("/api/stocks/search")
 def search_stocks(q: str):
-    """종목 검색 (입력 자동완성용)."""
+    """종목 검색 (레거시 — 구성종목 기반 단건)."""
     stock = db.find_stock(q)
     return [stock] if stock else []
+
+
+@app.get("/api/symbols/search")
+def search_symbols(q: str, limit: int = 10):
+    """국내+해외 심볼 fuzzy 검색 (희망 포트폴리오 자동완성용).
+
+    반환: [{symbol, name, name_en, market(KR|US), sec_label(주식|ETF|ETN|...), is_etf_like}]
+    """
+    return db.search_symbols(q, limit)
+
+
+@app.get("/api/etfs/search")
+def search_etfs(q: str, limit: int = 10):
+    """연금 매매가능 ETF 유니버스 내 fuzzy 검색 (보유 ETF 자동완성용)."""
+    return db.search_etfs(q, limit)
 
 
 @app.post("/api/recommend")

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { fetchEtfs, recommend } from './api.js'
+import { useState } from 'react'
+import { recommend } from './api.js'
 import InputScreen from './screens/InputScreen.jsx'
 import ResultScreen from './screens/ResultScreen.jsx'
 import SimilarScreen from './screens/SimilarScreen.jsx'
@@ -14,15 +14,10 @@ const TABS = [
 
 export default function App() {
   const [tab, setTab] = useState('input')
-  const [etfs, setEtfs] = useState([])
   const [accountType, setAccountType] = useState('pension')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    fetchEtfs().then(setEtfs).catch(e => setError(e.message))
-  }, [])
 
   const submit = async (payload) => {
     setLoading(true)
@@ -60,7 +55,7 @@ export default function App() {
         )}
 
         {!loading && tab === 'input' && (
-          <InputScreen etfs={etfs} onSubmit={submit} />
+          <InputScreen onSubmit={submit} />
         )}
         {!loading && tab === 'result' && (
           result ? <ResultScreen data={result} /> :

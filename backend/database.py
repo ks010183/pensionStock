@@ -94,6 +94,152 @@ def _to_etf_dict(row: dict) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
+# 심볼 마스터 (datamart_symbolkor / datamart_symbolus) — fuzzy 검색·조회
+# ---------------------------------------------------------------------------
+
+def sec_type_label(sec_type: str | None) -> str:
+    """sec_type 설명문 → 짧은 구분 라벨 (주식/ETF/ETN/단일종목ETF/REIT/기타)."""
+    s = sec_type or ""
+    if "single stock" in s:
+        return "단일종목ETF"
+    if "exchange-traded fund" in s:
+        return "ETF"
+    if "exchange-traded note" in s:
+        return "ETN"
+    if "real estate" in s:
+        return "REIT"
+    if "general stock" in s:
+        return "주식"
+    return "기타"
+
+
+def _symbol_row_to_dict(r: dict, market: str) -> dict:
+    label = sec_type_label(r.get("sec_type"))
+    return {
+        "symbol": r["symbol"],
+        "name": r.get("name_ko") or r.get("name") or r["symbol"],
+        "name_en": r.get("name"),
+        "market": market,                       # KR | US
+        "sec_label": label,                     # 주식 | ETF | ETN | ...
+        "is_etf_like": label in ("ETF", "ETN", "단일종목ETF"),
+        "order_rank": int(r.get("order_rank") or 0),
+    }
+
+
+def search_symbols(query: str, limit: int = 10) -> list[dict]:
+    """국내+해외 심볼 fuzzy 검색 (자동완성용).
+
+    - 매칭: 티커/한글명/영문명 부분일치 (모든 공백 구분 토큰이 포함되어야 함)
+    - 랭킹: 정확일치 > 접두일치 > order_rank(1이 가장 중요, 0은 미지정) > 이름 길이
+    """
+    q = query.strip()
+    if not q:
+        return []
+    tokens = [t for t in q.split() if t]
+    cond = " AND ".join(
+        f"(symbol LIKE :t{i} OR name_ko LIKE :sub{i} OR name LIKE :sub{i})"
+        for i in range(len(tokens))
+    )
+    params: dict[str, Any] = {}
+    for i, t in enumerate(tokens):
+        params[f"t{i}"] = f"{t}%"          # 티커는 접두 매칭
+        params[f"sub{i}"] = f"%{t}%"       # 이름은 부분 매칭
+    fetch = max(limit * 3, 20)
+
+    out: list[dict] = []
+    for table, market in (("datamart_symbolkor", "KR"), ("datamart_symbolus", "US")):
+        rows = _rows(
+            f"""
+            SELECT symbol, name, name_ko, sec_type, order_rank
+            FROM {table}
+            WHERE deleted_at IS NULL AND status = 'active'
+              AND symbol IS NOT NULL AND {cond}
+            LIMIT {fetch}
+            """,
+            **params,
+        )
+        out.extend(_symbol_row_to_dict(r, market) for r in rows)
+
+    ql = q.lower()
+
+    def score(d: dict) -> tuple:
+        name, name_en, sym = (d["name"] or "").lower(), (d["name_en"] or "").lower(), d["symbol"].lower()
+        exact = ql in (name, name_en, sym)
+        prefix = name.startswith(ql) or name_en.startswith(ql) or sym.startswith(ql)
+        rank = d["order_rank"] if d["order_rank"] > 0 else 9999
+        return (not exact, not prefix, rank, d["market"] != "KR", len(name))
+
+    out.sort(key=score)
+    return out[:limit]
+
+
+def lookup_symbol(symbol: str) -> dict | None:
+    """티커 정확일치 조회 (KR 우선, 다음 US). 없으면 etf_integration 에서 보강."""
+    for table, market in (("datamart_symbolkor", "KR"), ("datamart_symbolus", "US")):
+        rows = _rows(
+            f"""
+            SELECT symbol, name, name_ko, sec_type, order_rank
+            FROM {table}
+            WHERE symbol = :s AND deleted_at IS NULL
+            LIMIT 1
+            """,
+            s=symbol,
+        )
+        if rows:
+            return _symbol_row_to_dict(rows[0], market)
+    rows = _rows(
+        "SELECT symbol, COALESCE(NULLIF(name_ko,''), name) AS name_ko, name, sec_type "
+        "FROM etf_integration WHERE symbol = :s LIMIT 1",
+        s=symbol,
+    )
+    if rows:
+        return _symbol_row_to_dict({**rows[0], "order_rank": 0}, "KR")
+    return None
+
+
+def search_etfs(query: str, limit: int = 10) -> list[dict]:
+    """연금 매매가능 ETF 유니버스 내 fuzzy 검색 (보유 ETF 자동완성용)."""
+    q = query.strip()
+    if not q:
+        return []
+    tokens = [t for t in q.split() if t]
+    cond = " AND ".join(
+        f"(e.symbol LIKE :t{i} OR e.name_ko LIKE :sub{i} OR e.name LIKE :sub{i})"
+        for i in range(len(tokens))
+    )
+    params: dict[str, Any] = {"lim": max(limit * 3, 20)}
+    for i, t in enumerate(tokens):
+        params[f"t{i}"] = f"{t}%"
+        params[f"sub{i}"] = f"%{t}%"
+    rows = _rows(
+        f"""
+        SELECT {_ETF_COLS}
+        FROM etf_integration e
+        WHERE {_UNIVERSE_WHERE} AND {cond}
+        ORDER BY (e.symbol = :exact) DESC, (e.name_ko LIKE :pfx) DESC, e.marketcap DESC
+        LIMIT :lim
+        """,
+        exact=q, pfx=f"{q}%", **params,
+    )
+    out = []
+    for r in rows:
+        d = _to_etf_dict(r)
+        if d:
+            out.append(d)
+    return out[:limit]
+
+
+def held_etf_count(stock_code: str) -> int:
+    """이 종목을 편입한 ETF 수 (0 이면 최적화로 목표 달성 불가)."""
+    rows = _rows(
+        "SELECT COUNT(DISTINCT symbol) AS c FROM datamart_etfholderkor "
+        "WHERE asset = :s AND deleted_at IS NULL",
+        s=stock_code,
+    )
+    return int(rows[0]["c"]) if rows else 0
+
+
+# ---------------------------------------------------------------------------
 # 종목 검색
 # ---------------------------------------------------------------------------
 
@@ -232,9 +378,13 @@ def stocks_in_same_theme(stock_query: str, limit: int = 30) -> list[dict]:
     반환 심볼에는 테마 ETF 가 포함될 수 있다 (이름은 etf_integration/구성종목에서 보강).
     """
     stock = find_stock(stock_query)
-    if not stock:
-        return []
-    code, name = stock["stock_code"], stock["stock_name"]
+    if stock:
+        code, name = stock["stock_code"], stock["stock_name"]
+    else:
+        info = lookup_symbol(stock_query)   # ETF 목표 등 구성종목 테이블에 없는 심볼
+        if not info:
+            return []
+        code, name = info["symbol"], info["name"]
     rows = _rows(
         """
         SELECT DISTINCT c2.symbol AS stock_code, c2.title AS theme_name,
@@ -316,9 +466,15 @@ def etf_holdings_map(etf_codes: list[str] | None = None) -> dict[str, dict[str, 
 
 
 def stock_names(stock_codes: list[str]) -> dict[str, str]:
+    """티커 → 이름. 구성종목 → 심볼 마스터(KR/US) → ETF 기본 순으로 보강.
+
+    (목표에 ETF 를 넣은 경우 해당 티커는 구성종목 테이블에 없을 수 있어 폴백 필요)
+    """
     if not stock_codes:
         return {}
-    codes = ",".join(f"'{c}'" for c in set(stock_codes))
+    uniq = set(stock_codes)
+    codes = ",".join(f"'{c}'" for c in uniq)
+    out: dict[str, str] = {}
     rows = _rows(
         f"""
         SELECT h.asset AS stock_code, MAX(h.item_name) AS stock_name
@@ -327,4 +483,24 @@ def stock_names(stock_codes: list[str]) -> dict[str, str]:
         GROUP BY h.asset
         """
     )
-    return {r["stock_code"]: r["stock_name"] for r in rows}
+    out.update({r["stock_code"]: r["stock_name"] for r in rows})
+    missing = uniq - set(out)
+    if missing:
+        mcodes = ",".join(f"'{c}'" for c in missing)
+        for table in ("datamart_symbolkor", "datamart_symbolus"):
+            rows = _rows(
+                f"SELECT symbol, COALESCE(NULLIF(name_ko,''), name) AS n "
+                f"FROM {table} WHERE symbol IN ({mcodes}) AND deleted_at IS NULL"
+            )
+            for r in rows:
+                out.setdefault(r["symbol"], r["n"])
+        missing = uniq - set(out)
+    if missing:
+        mcodes = ",".join(f"'{c}'" for c in missing)
+        rows = _rows(
+            f"SELECT symbol, COALESCE(NULLIF(name_ko,''), name) AS n "
+            f"FROM etf_integration WHERE symbol IN ({mcodes})"
+        )
+        for r in rows:
+            out.setdefault(r["symbol"], r["n"])
+    return out

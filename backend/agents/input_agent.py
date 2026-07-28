@@ -60,6 +60,11 @@ class InputAnalysisAgent(BaseAgent):
     async def run(self, context: dict[str, Any]) -> dict[str, Any]:
         raw = context.get("desired_portfolio")
 
+        # 0) 구조화 입력 (프론트 자동완성: [{symbol, name, weight, kind}])
+        #    — symbol 이 명시된 항목은 심볼 마스터로 검증 후 주식/ETF 를 분리 처리
+        if isinstance(raw, list) and any(isinstance(d, dict) and d.get("symbol") for d in raw):
+            return await self._run_structured(context, raw)
+
         # 1) 파싱: 구조화 입력([{name, weight}]) 또는 자유 텍스트
         if isinstance(raw, list):
             pairs = [(d["name"], float(d["weight"])) for d in raw]
@@ -112,7 +117,68 @@ class InputAnalysisAgent(BaseAgent):
             warnings.append("유효한 목표 종목이 없습니다.")
 
         context["target_portfolio"] = target
+        context["etf_targets"] = {}
         context["target_detail"] = resolved
         context["input_warnings"] = warnings
         self.log(context, f"목표 포트폴리오 확정: {len(target)}종목, 합계 {total:.1f}%")
+        return context
+
+    async def _run_structured(self, context: dict[str, Any], raw: list[dict]) -> dict[str, Any]:
+        """자동완성 기반 구조화 입력 처리: 주식 목표와 ETF 목표를 분리한다.
+
+        - 주식(kind='stock'): target_portfolio {티커: %} — 최적화 목적함수의 목표 비중
+        - ETF (kind='etf')  : etf_targets {티커: %} — 최적화Agent 가 구성종목으로
+          룩스루 전개(구성 데이터 없으면 해당 ETF 직접 매수 목표로 처리)
+        """
+        target: dict[str, float] = {}
+        etf_targets: dict[str, float] = {}
+        resolved: list[dict] = []
+        warnings: list[str] = []
+
+        for d in raw:
+            sym = str(d.get("symbol") or "").strip()
+            weight = float(d.get("weight") or 0)
+            if not sym or weight <= 0:
+                continue
+            info = db.lookup_symbol(sym)
+            if info is None:
+                warnings.append(f"심볼 '{sym}' 을 DB에서 찾을 수 없습니다.")
+                continue
+            kind = d.get("kind") or ("etf" if info["is_etf_like"] else "stock")
+            name = d.get("name") or info["name"]
+
+            if kind == "etf":
+                etf_targets[sym] = etf_targets.get(sym, 0) + weight
+            else:
+                target[sym] = target.get(sym, 0) + weight
+                if db.held_etf_count(sym) == 0:
+                    warnings.append(
+                        f"'{name}' 을 편입한 ETF가 없어 목표 달성이 어렵습니다. "
+                        "유사 종목/테마 ETF를 참고하세요."
+                    )
+            resolved.append({
+                "stock_code": sym,
+                "stock_name": name,
+                "kind": kind,
+                "market": info["market"],
+                "sec_label": info["sec_label"],
+                "sector_name": db.dominant_sector_for_stock(sym) if kind == "stock" else None,
+                "weight": weight,
+            })
+
+        total = sum(target.values()) + sum(etf_targets.values())
+        if total > 100:
+            warnings.append(f"목표 비중 합계가 {total:.1f}%로 100%를 초과합니다.")
+        if not target and not etf_targets:
+            warnings.append("유효한 목표 종목이 없습니다.")
+
+        context["target_portfolio"] = target
+        context["etf_targets"] = etf_targets
+        context["target_detail"] = resolved
+        context["input_warnings"] = warnings
+        self.log(
+            context,
+            f"구조화 입력 확정: 주식 {len(target)}종목 + ETF {len(etf_targets)}종목, "
+            f"합계 {total:.1f}%",
+        )
         return context

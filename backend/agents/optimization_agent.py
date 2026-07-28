@@ -23,11 +23,30 @@ class OptimizationAgent(BaseAgent):
     llm_key = "OPTIMIZATION"
 
     async def run(self, context: dict[str, Any]) -> dict[str, Any]:
-        target: dict[str, float] = context.get("target_portfolio", {})
+        target: dict[str, float] = dict(context.get("target_portfolio", {}))
+        etf_targets: dict[str, float] = context.get("etf_targets", {}) or {}
         owned: dict[str, float] = context.get("owned", {})
         cash: float = context.get("cash", 0)
         account_type: str = context.get("account_type", "pension")
         candidate_codes: set[str] = set(context.get("candidate_etf_codes", []))
+
+        # ---- ETF 목표 룩스루 전개 ------------------------------------------
+        # ETF 목표는 구성종목 비중으로 전개해 주식 목표에 합산한다.
+        # 구성 데이터가 없는 ETF(해외 상품 등)는 해당 ETF 를 의사자산으로 두어
+        # "그 ETF 를 직접 매수"하는 목표로 처리한다.
+        pseudo_etfs: set[str] = set()
+        if etf_targets:
+            t_hold = db.etf_holdings_map(sorted(etf_targets))
+            for etf, w in etf_targets.items():
+                h = t_hold.get(etf, {})
+                if h:
+                    for s, hw in h.items():
+                        target[s] = target.get(s, 0) + w * hw / 100.0
+                    self.log(context, f"ETF 목표 '{etf}' {w}% → 구성 {len(h)}종목으로 전개")
+                else:
+                    target[etf] = target.get(etf, 0) + w
+                    pseudo_etfs.add(etf)
+                    self.log(context, f"ETF 목표 '{etf}' {w}% → 구성정보 없음, 직접 매수 목표로 처리")
 
         all_meta = db.all_etfs()
 
@@ -35,13 +54,16 @@ class OptimizationAgent(BaseAgent):
         safe_codes = [e["etf_code"] for e in all_meta if e["asset_class"] == "SAFE"]
         safe_codes = safe_codes[: config.MAX_SAFE_CANDIDATES]  # all_etfs 는 시총 내림차순
 
-        universe_codes = candidate_codes | set(owned) | set(safe_codes)
+        universe_codes = candidate_codes | set(owned) | set(safe_codes) | set(etf_targets)
         # 후보가 아예 없으면(검색 실패 등) 시총 상위 위험자산으로 보충
         if not candidate_codes:
             risk_top = [e["etf_code"] for e in all_meta if e["asset_class"] == "RISK"][:30]
             universe_codes |= set(risk_top)
 
         holdings = db.etf_holdings_map(sorted(universe_codes))
+        # 의사자산 ETF: 자기 자신 100% 보유로 취급 → 직접 매수 시 목표 충족
+        for etf in pseudo_etfs:
+            holdings[etf] = {etf: 100.0}
 
         universe = [
             EtfInfo(
@@ -51,6 +73,14 @@ class OptimizationAgent(BaseAgent):
             )
             for e in all_meta if e["etf_code"] in universe_codes
         ]
+
+        missing_targets = set(etf_targets) - {e.etf_code for e in universe}
+        if missing_targets:
+            self.log(
+                context,
+                f"목표 ETF 중 연금 매매가능 유니버스에 없어 직접 매수 불가: "
+                f"{', '.join(sorted(missing_targets))}",
+            )
 
         result = optimize(OptimizationInput(
             target=target, owned=owned, cash=cash,

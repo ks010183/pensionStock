@@ -144,6 +144,58 @@ html, body {
   font-size: 16px; cursor: pointer; padding: 4px 8px;
 }
 
+/* ---------- 자동완성 (SymbolSearch) ---------- */
+.ss-box { position: relative; }
+.ss-box input {
+  width: 100%; padding: 11px 12px; font-size: 14px;
+  border: 1px solid var(--baseline); border-radius: 10px;
+  background: var(--page); color: var(--text-primary); font-family: inherit;
+}
+.ss-box input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.ss-loading {
+  position: absolute; right: 12px; top: 13px; width: 14px; height: 14px;
+  border: 2px solid var(--grid); border-top-color: var(--accent);
+  border-radius: 999px; animation: spin 0.8s linear infinite;
+}
+.ss-drop {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; max-height: 280px; overflow-y: auto;
+}
+.ss-item {
+  display: block; width: 100%; text-align: left; padding: 10px 12px;
+  border: none; background: transparent; cursor: pointer; font-family: inherit;
+  color: var(--text-primary); font-size: 13.5px;
+  border-bottom: 1px solid var(--grid);
+}
+.ss-item:last-child { border-bottom: none; }
+.ss-item:hover, .ss-item.hi { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.ss-empty { padding: 12px; font-size: 12.5px; color: var(--text-muted); text-align: center; }
+.ss-row { display: flex; align-items: center; gap: 6px; }
+.ss-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-sym { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* 종목 유형 배지 (주식/ETF/ETN/US) */
+.tbadge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 5px; margin-left: 6px; vertical-align: 1px; flex: none;
+}
+.tbadge.b-stock { color: var(--series-1); border: 1px solid var(--series-1); }
+.tbadge.b-etf { color: var(--series-3); border: 1px solid var(--series-3); }
+.tbadge.b-etc { color: var(--text-muted); border: 1px solid var(--border); }
+
+/* 선택된 항목 표시 */
+.picked {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border: 1px solid var(--accent); border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent); font-size: 14px; font-weight: 600;
+}
+
+/* 배분 진행 바 */
+.alloc-bar { height: 6px; border-radius: 6px; background: var(--grid); overflow: hidden; margin-bottom: 6px; }
+.alloc-bar i { display: block; height: 100%; background: var(--accent); border-radius: 6px; transition: width 0.3s ease; }
+.hint.err { color: var(--status-critical); font-weight: 600; }
+
 /* ---------- 검증(verdict) ---------- */
 .verdict { display: flex; align-items: center; gap: 12px; }
 .verdict .icon {

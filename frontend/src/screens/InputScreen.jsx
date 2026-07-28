@@ -1,28 +1,70 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import SymbolSearch from '../components/SymbolSearch.jsx'
 
 const KRW = n => Number(n).toLocaleString('ko-KR')
 
-export default function InputScreen({ etfs, onSubmit }) {
+// sec_label → 배지 색 클래스
+const badgeClass = label =>
+  label === '주식' ? 'b-stock' : label === 'ETF' ? 'b-etf' : 'b-etc'
+
+export default function InputScreen({ onSubmit }) {
   const [accountType, setAccountType] = useState('pension')
   const [cash, setCash] = useState('7000000')
-  const [desired, setDesired] = useState('삼성전자 20%, 현대차 10%, 한화 20%')
-  const [holdings, setHoldings] = useState([{ etf_code: '069500', amount: 3000000 }])
-  const [selEtf, setSelEtf] = useState('')
-  const [selAmt, setSelAmt] = useState('')
 
-  const etfName = code => etfs.find(e => e.etf_code === code)?.etf_name || code
-  const etfClass = code => etfs.find(e => e.etf_code === code)?.asset_class || ''
+  // ---- 희망 포트폴리오 (구조화 입력) ----
+  const [entries, setEntries] = useState([])           // [{symbol,name,weight,kind,sec_label,market}]
+  const [pendingSym, setPendingSym] = useState(null)   // 자동완성으로 선택된 종목
+  const [pendingW, setPendingW] = useState('')
+  const [wError, setWError] = useState('')
 
-  const addHolding = () => {
-    if (!selEtf || !selAmt || Number(selAmt) <= 0) return
-    setHoldings(h => {
-      const other = h.filter(x => x.etf_code !== selEtf)
-      return [...other, { etf_code: selEtf, amount: Number(selAmt) }]
+  const used = useMemo(() => entries.reduce((s, e) => s + e.weight, 0), [entries])
+  const remaining = Math.max(0, Math.round((100 - used) * 100) / 100)
+
+  const addEntry = () => {
+    const w = Number(pendingW)
+    setWError('')
+    if (!pendingSym) { setWError('종목을 먼저 검색해 선택하세요.'); return }
+    if (!w || w <= 0) { setWError('비율(%)을 입력하세요.'); return }
+    if (w > remaining) {
+      setWError(`100%를 초과합니다 — 입력 가능한 남은 비율은 ${remaining}% 입니다.`)
+      return
+    }
+    setEntries(list => {
+      const other = list.filter(e => e.symbol !== pendingSym.symbol)
+      const prev = list.find(e => e.symbol === pendingSym.symbol)
+      return [...other, {
+        symbol: pendingSym.symbol,
+        name: pendingSym.name,
+        sec_label: pendingSym.sec_label,
+        market: pendingSym.market,
+        kind: pendingSym.is_etf_like ? 'etf' : 'stock',
+        weight: (prev ? prev.weight : 0) + w,
+      }]
     })
-    setSelEtf(''); setSelAmt('')
+    setPendingSym(null)
+    setPendingW('')
   }
 
-  const canSubmit = desired.trim().length > 0 && Number(cash) >= 0
+  // ---- 보유 ETF (자동완성) ----
+  const [holdings, setHoldings] = useState([])          // [{etf_code, etf_name, asset_class, amount}]
+  const [pendingEtf, setPendingEtf] = useState(null)
+  const [pendingAmt, setPendingAmt] = useState('')
+  const [hError, setHError] = useState('')
+
+  const addHolding = () => {
+    const amt = Number(pendingAmt)
+    setHError('')
+    if (!pendingEtf) { setHError('ETF를 먼저 검색해 선택하세요.'); return }
+    if (!amt || amt <= 0) { setHError('평가금액(원)을 입력하세요.'); return }
+    setHoldings(list => {
+      const other = list.filter(h => h.etf_code !== pendingEtf.etf_code)
+      return [...other, { ...pendingEtf, amount: amt }]
+    })
+    setPendingEtf(null)
+    setPendingAmt('')
+  }
+
+  const canSubmit = entries.length > 0 && Number(cash) >= 0
 
   return (
     <>
@@ -44,14 +86,73 @@ export default function InputScreen({ etfs, onSubmit }) {
       </section>
 
       <section className="card">
-        <h2>희망 포트폴리오 <span className="sub">자유롭게 입력하세요</span></h2>
-        <div className="field">
-          <textarea
-            value={desired}
-            onChange={e => setDesired(e.target.value)}
-            placeholder="예) 삼성전자 20%, 현대차 10%, 한화 20%"
-          />
-          <p className="hint">입력분석 Agent가 종목명과 비중을 추출해 DB 종목과 매칭합니다.</p>
+        <h2>희망 포트폴리오
+          <span className="sub">주식·ETF 검색 후 비율 입력</span>
+        </h2>
+
+        {/* 진행 바 + 잔여 비율 */}
+        <div className="alloc-bar">
+          <i style={{ width: `${Math.min(100, used)}%` }} />
+        </div>
+        <p className={`hint ${used > 100 ? 'err' : ''}`} style={{ marginBottom: 10 }}>
+          {used > 0 ? `합계 ${used}% 입력됨 · ` : ''}남은 입력 가능 비율 <b>{remaining}%</b>
+        </p>
+
+        {/* 추가된 항목 리스트 */}
+        {entries.map(e => (
+          <div className="holding-item" key={e.symbol}>
+            <div>
+              <div className="name">
+                {e.name}
+                <span className={`tbadge ${badgeClass(e.sec_label)}`}>{e.sec_label}</span>
+                {e.market === 'US' && <span className="tbadge b-etc">US</span>}
+              </div>
+              <div className="meta">{e.symbol}</div>
+            </div>
+            <div className="row">
+              <span className="amt">{e.weight}%</span>
+              <button className="x-btn" aria-label="삭제"
+                onClick={() => setEntries(list => list.filter(x => x.symbol !== e.symbol))}>✕</button>
+            </div>
+          </div>
+        ))}
+
+        {/* 종목 검색 + 비율 + 추가 */}
+        <div style={{ marginTop: entries.length ? 10 : 0 }}>
+          {pendingSym ? (
+            <div className="picked">
+              <span>
+                {pendingSym.name}
+                <span className={`tbadge ${badgeClass(pendingSym.sec_label)}`}>{pendingSym.sec_label}</span>
+                {pendingSym.market === 'US' && <span className="tbadge b-etc">US</span>}
+                <span className="meta" style={{ marginLeft: 6 }}>{pendingSym.symbol}</span>
+              </span>
+              <button className="x-btn" onClick={() => setPendingSym(null)}>✕</button>
+            </div>
+          ) : (
+            <SymbolSearch
+              endpoint="/api/symbols/search"
+              placeholder="종목명 또는 티커 검색 (예: 삼성, KODEX, aapl)"
+              onSelect={setPendingSym}
+              renderItem={it => (
+                <span className="ss-row">
+                  <span className="ss-name">{it.name}</span>
+                  <span className={`tbadge ${badgeClass(it.sec_label)}`}>{it.sec_label}</span>
+                  {it.market === 'US' && <span className="tbadge b-etc">US</span>}
+                  <span className="ss-sym">{it.symbol}</span>
+                </span>
+              )}
+            />
+          )}
+          <div className="row" style={{ marginTop: 8 }}>
+            <input className="grow" type="number" inputMode="decimal" min="0" max={remaining}
+              placeholder={`비율 % (최대 ${remaining}%)`}
+              value={pendingW} onChange={e => { setPendingW(e.target.value); setWError('') }}
+              style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid var(--baseline)', background: 'var(--page)', color: 'var(--text-primary)', fontSize: 14 }} />
+            <button className="btn small" onClick={addEntry} disabled={remaining <= 0}>추가</button>
+          </div>
+          {wError && <p className="hint err">{wError}</p>}
+          {remaining <= 0 && <p className="hint err">비중 합계가 100%에 도달했습니다. 항목을 삭제 후 조정하세요.</p>}
         </div>
       </section>
 
@@ -67,51 +168,67 @@ export default function InputScreen({ etfs, onSubmit }) {
       </section>
 
       <section className="card">
-        <h2>보유 ETF</h2>
+        <h2>보유 ETF <span className="sub">ETF 검색 후 평가금액 입력</span></h2>
         {holdings.length === 0 && <p className="hint">보유 중인 ETF가 없으면 비워 두세요.</p>}
         {holdings.map(h => (
           <div className="holding-item" key={h.etf_code}>
             <div>
               <div className="name">
-                {etfName(h.etf_code)}
-                <span className={`chip ${etfClass(h.etf_code)}`}>
-                  {etfClass(h.etf_code) === 'SAFE' ? '안전' : '위험'}
-                </span>
+                {h.etf_name}
+                <span className={`chip ${h.asset_class}`}>{h.asset_class === 'SAFE' ? '안전' : '위험'}</span>
               </div>
               <div className="meta">{h.etf_code}</div>
             </div>
             <div className="row">
               <span className="amt">{KRW(h.amount)}원</span>
               <button className="x-btn" aria-label="삭제"
-                onClick={() => setHoldings(hs => hs.filter(x => x.etf_code !== h.etf_code))}>✕</button>
+                onClick={() => setHoldings(list => list.filter(x => x.etf_code !== h.etf_code))}>✕</button>
             </div>
           </div>
         ))}
-        <div className="row" style={{ marginTop: 10 }}>
-          <select className="grow" value={selEtf} onChange={e => setSelEtf(e.target.value)}
-            style={{ padding: '10px', borderRadius: 10, border: '1px solid var(--baseline)', background: 'var(--page)', color: 'var(--text-primary)', fontSize: 13 }}>
-            <option value="">ETF 선택…</option>
-            {etfs.map(e => (
-              <option key={e.etf_code} value={e.etf_code}>
-                {e.etf_name} ({e.asset_class === 'SAFE' ? '안전' : '위험'})
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="row" style={{ marginTop: 8 }}>
-          <input className="grow" type="number" inputMode="numeric" placeholder="평가금액(원)"
-            value={selAmt} onChange={e => setSelAmt(e.target.value)}
-            style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid var(--baseline)', background: 'var(--page)', color: 'var(--text-primary)', fontSize: 14 }} />
-          <button className="btn small" onClick={addHolding}>추가</button>
+
+        <div style={{ marginTop: holdings.length ? 10 : 0 }}>
+          {pendingEtf ? (
+            <div className="picked">
+              <span>
+                {pendingEtf.etf_name}
+                <span className={`chip ${pendingEtf.asset_class}`}>{pendingEtf.asset_class === 'SAFE' ? '안전' : '위험'}</span>
+                <span className="meta" style={{ marginLeft: 6 }}>{pendingEtf.etf_code}</span>
+              </span>
+              <button className="x-btn" onClick={() => setPendingEtf(null)}>✕</button>
+            </div>
+          ) : (
+            <SymbolSearch
+              endpoint="/api/etfs/search"
+              placeholder="보유 ETF 검색 (예: KODEX, 단기채권)"
+              onSelect={setPendingEtf}
+              renderItem={it => (
+                <span className="ss-row">
+                  <span className="ss-name">{it.etf_name}</span>
+                  <span className={`chip ${it.asset_class}`}>{it.asset_class === 'SAFE' ? '안전' : '위험'}</span>
+                  <span className="ss-sym">{it.etf_code}</span>
+                </span>
+              )}
+            />
+          )}
+          <div className="row" style={{ marginTop: 8 }}>
+            <input className="grow" type="number" inputMode="numeric" placeholder="평가금액(원)"
+              value={pendingAmt} onChange={e => { setPendingAmt(e.target.value); setHError('') }}
+              style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid var(--baseline)', background: 'var(--page)', color: 'var(--text-primary)', fontSize: 14 }} />
+            <button className="btn small" onClick={addHolding}>추가</button>
+          </div>
+          {hError && <p className="hint err">{hError}</p>}
         </div>
       </section>
 
       <button className="btn" disabled={!canSubmit} onClick={() => onSubmit({
-        desired_portfolio: desired,
+        desired_portfolio: entries.map(e => ({
+          symbol: e.symbol, name: e.name, weight: e.weight, kind: e.kind,
+        })),
         account: {
           account_type: accountType,
           cash: Number(cash),
-          holdings,
+          holdings: holdings.map(h => ({ etf_code: h.etf_code, amount: h.amount })),
         },
       })}>
         최적 ETF 추천받기

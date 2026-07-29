@@ -1,0 +1,669 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+marker
+##### COLUMNS #####
+TABLE_NAME	ORDINAL_POSITION	COLUMN_NAME	COLUMN_TYPE	IS_NULLABLE	COLUMN_KEY	COLUMN_DEFAULT	EXTRA	COLUMN_COMMENT
+datamart_etfholderkor	1	id	varchar(100)	NO	PRI	NULL		
+datamart_etfholderkor	2	symbol	varchar(50)	NO	MUL	NULL		It is a ticker or symbol that holds individual securities or assets.
+datamart_etfholderkor	3	item_name	varchar(100)	YES	MUL	NULL		It is a ticker or symbol of individual securities or assets that are held by the ETF as its holdings.
+datamart_etfholderkor	4	weight_percentage	double	YES		NULL		The proportion of each individual asset within the total portfolio of the ETF, expressed as a percentage. This metric is crucial for understanding how much influence each holding has on the ETF's overall performance. ;;;%
+datamart_etfholderkor	5	shares_number	double	YES		NULL		Number of shares or securities that are held by the ETF
+datamart_etfholderkor	6	market_value	double	YES		NULL		Market value of shares or securities that are held by the ETF
+datamart_etfholderkor	7	created_at	datetime(6)	NO	MUL	NULL		
+datamart_etfholderkor	8	asset	varchar(100)	YES	MUL	NULL		Represents the ticker and nature of holdings. When the value is '-1', it indicates unlisted securities, otherwise it indicates listed securities.
+datamart_etfholderkor	9	dumped_at	datetime(6)	YES	MUL	NULL		
+datamart_etfholderkor	10	deleted_at	datetime(6)	YES	MUL	NULL		
+datamart_etfholderkor	11	updated_at	datetime(6)	YES	MUL	NULL		
+datamart_etfsectorweightkor	1	id	varchar(100)	NO	PRI	NULL		
+datamart_etfsectorweightkor	2	symbol	varchar(50)	NO	MUL	NULL		It is a ticker or symbol that holds individual securities or assets.
+datamart_etfsectorweightkor	3	sector_name	varchar(100)	YES	MUL	NULL		Shows the specific name of the sector, typically using an established sector classification system
+datamart_etfsectorweightkor	4	weight_percentage	double	YES		NULL		the proportion of an ETF's assets invested in each market sector. ;;;%
+datamart_etfsectorweightkor	5	created_at	datetime(6)	NO	MUL	NULL		
+datamart_etfsectorweightkor	6	dumped_at	datetime(6)	YES	MUL	NULL		
+datamart_etfsectorweightkor	7	deleted_at	datetime(6)	YES	MUL	NULL		
+datamart_etfsectorweightkor	8	updated_at	datetime(6)	YES	MUL	NULL		
+datamart_stockcategorykor	1	id	varchar(100)	NO	PRI	NULL		
+datamart_stockcategorykor	2	title	varchar(300)	NO	MUL	NULL		
+datamart_stockcategorykor	3	description	varchar(500)	NO	MUL	NULL		
+datamart_stockcategorykor	4	created_at	datetime(6)	NO	MUL	NULL		
+datamart_stockcategorykor	5	rep_symbol	varchar(10)	YES	MUL	NULL		used as a symbol or ticker to represent each theme or category.
+datamart_stockcategorykor	6	search_tag	varchar(200)	YES	MUL	NULL		used as a keyword describing, identifying or searching for the theme or category.
+datamart_stockcategorykor	7	dumped_at	datetime(6)	YES	MUL	NULL		
+datamart_stockcategorykor	8	symbol	varchar(10)	YES	MUL	NULL		Shows the specific tiker of the theme or category.
+datamart_stockcategorykor	9	deleted_at	datetime(6)	YES	MUL	NULL		
+datamart_stockcategorykor	10	updated_at	datetime(6)	YES	MUL	NULL		
+etf_integration	1	symbol	varchar(50)	YES		NULL		Ticker symbol and stock symbol is an abbreviation used to uniquely identify publicly traded stock or security on a stock exchange
+etf_integration	2	symbol_id	bigint	NO		NULL		
+etf_integration	3	name	varchar(500)	YES		NULL		
+etf_integration	4	name_ko	varchar(500)	YES		NULL		
+etf_integration	5	description	varchar(2500)	YES		NULL		
+etf_integration	6	domicile	varchar(500)	YES		NULL		Shows which country the stock or ETF is registered, listed or traded.
+etf_integration	7	sec_type	varchar(500)	YES		NULL		It explains the feature, structure or investmesnt characteristics of each security. It is a type of asset class or classification.
+etf_integration	8	first_trading_date	date	YES		NULL		
+etf_integration	9	symbol_deleted_at	datetime(6)	YES		NULL		
+etf_integration	10	status	varchar(500)	YES		NULL		It shows whether the security is tradeable or not.
+etf_integration	11	expense	double	YES		NULL		
+etf_integration	12	detail_deleted_at	datetime(6)	YES		NULL		
+etf_integration	13	bench_mark	varchar(800)	YES		NULL		
+etf_integration	14	leverage_power	double	YES		NULL		
+etf_integration	15	origin_etf	varchar(10)	YES		NULL		
+etf_integration	16	is_inverse	varchar(200)	YES		NULL		
+etf_integration	17	is_leveraged	varchar(200)	YES		NULL		
+etf_integration	18	product_keyword	varchar(450)	YES		NULL		
+etf_integration	19	etf_keyword	varchar(300)	YES		NULL		
+etf_integration	20	pension	varchar(200)	YES		NULL		
+etf_integration	21	mgmt_strategy	varchar(200)	YES		NULL		
+etf_integration	22	expense_misc	double	YES		NULL		
+etf_integration	23	expense_transaction	double	YES		NULL		
+etf_integration	24	total_expense	double	YES		NULL		
+etf_integration	25	fund_type	varchar(20)	YES		NULL		
+etf_integration	26	tax_treatment	varchar(20)	YES		NULL		
+etf_integration	27	index_replication	varchar(20)	YES		NULL		
+etf_integration	28	marketcap	double	YES		NULL		The total value of a company's outstanding shares in the market, calculated by multiplying the current stock price by the number of shares.
+etf_integration	29	nav	double	YES		NULL		represents the per-share value of all the underlying assets (Net Asset Value)
+etf_integration	30	divdend_yield	double	YES		NULL		The annual dividend payout per share as a percentage of the current stock price.
+etf_integration	31	week52high	double	YES		NULL		The highest price at which the stock traded over the past 52 weeks.
+etf_integration	32	week52high_date	varchar(50)	YES		NULL		The specific date on which the stock reached its 52-week high.
+etf_integration	33	week52low	double	YES		NULL		The lowest price at which the stock traded over the past 52 weeks.
+etf_integration	34	week52low_date	varchar(50)	YES		NULL		The specific date on which the stock reached its 52-week low.
+etf_integration	35	avg_10_volume	double	YES		NULL		The average number of shares traded per day over the last 10 trading days.
+etf_integration	36	avg_20_volume	double	YES		NULL		The average number of shares traded per day over the last 20 trading days.
+etf_integration	37	avg_40_volume	double	YES		NULL		
+etf_integration	38	avg_60_volume	double	YES		NULL		The average number of shares traded per day over the last 60 trading days.
+etf_integration	39	avg_120_volume	double	YES		NULL		The average number of shares traded per day over the last 120 trading days.
+etf_integration	40	avg_10_amount	double	YES		NULL		The average amount of money traded per day over the last 10 trading days.
+etf_integration	41	avg_20_amount	double	YES		NULL		The average amount of money traded per day over the last 20 trading days.
+etf_integration	42	avg_40_amount	double	YES		NULL		
+etf_integration	43	avg_60_amount	double	YES		NULL		The average amount of money traded per day over the last 60 trading days.
+etf_integration	44	avg_120_amount	double	YES		NULL		The average amount of money traded per day over the last 120 trading days.
+etf_integration	45	day_10_moving_avg	double	YES		NULL		The average closing price of the stock over the past 10 trading days, smoothing out short-term price fluctuations.
+etf_integration	46	day_20_moving_avg	double	YES		NULL		The average closing price of the stock over the past 20 trading days, indicating a short-to-medium term trend.
+etf_integration	47	day_40_moving_avg	double	YES		NULL		
+etf_integration	48	day_60_moving_avg	double	YES		NULL		The average closing price of the stock over the past 60 trading days, indicating a medium-term trend.
+etf_integration	49	day_120_moving_avg	double	YES		NULL		The average closing price of the stock over the past 120 trading days, indicating a longer-term trend.
+etf_integration	50	dumped_at	datetime(6)	YES		NULL		
+marker
+##### INDEXES #####
+TABLE_NAME	INDEX_NAME	NON_UNIQUE	SEQ_IN_INDEX	COLUMN_NAME
+datamart_etfholderkor	datamart_etfholderkor_asset_2e8103e5	1	1	asset
+datamart_etfholderkor	datamart_etfholderkor_created_at_8e87f9d1	1	1	created_at
+datamart_etfholderkor	datamart_etfholderkor_deleted_at_e42e0265	1	1	deleted_at
+datamart_etfholderkor	datamart_etfholderkor_dumped_at_5545c185	1	1	dumped_at
+datamart_etfholderkor	datamart_etfholderkor_etf_symbol_026456ae	1	1	symbol
+datamart_etfholderkor	datamart_etfholderkor_item_name_94bb787c	1	1	item_name
+datamart_etfholderkor	datamart_etfholderkor_updated_at_40aa2201	1	1	updated_at
+datamart_etfholderkor	PRIMARY	0	1	id
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_created_at_c55737e1	1	1	created_at
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_deleted_at_a87f3b2d	1	1	deleted_at
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_dumped_at_16ac50a0	1	1	dumped_at
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_etf_symbol_d4027b19	1	1	symbol
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_sector_name_608c117a	1	1	sector_name
+datamart_etfsectorweightkor	datamart_etfsectorweightkor_updated_at_adca7496	1	1	updated_at
+datamart_etfsectorweightkor	PRIMARY	0	1	id
+datamart_stockcategorykor	datamart_stockcategorykor_created_at_c419a183	1	1	created_at
+datamart_stockcategorykor	datamart_stockcategorykor_deleted_at_a3345e6f	1	1	deleted_at
+datamart_stockcategorykor	datamart_stockcategorykor_description_1d75368c	1	1	description
+datamart_stockcategorykor	datamart_stockcategorykor_dumped_at_6973696e	1	1	dumped_at
+datamart_stockcategorykor	datamart_stockcategorykor_rep_symbol_2a67312a	1	1	rep_symbol
+datamart_stockcategorykor	datamart_stockcategorykor_search_tag_85ba6cd4	1	1	search_tag
+datamart_stockcategorykor	datamart_stockcategorykor_symbol_db26ea6f	1	1	symbol
+datamart_stockcategorykor	datamart_stockcategorykor_title_12b5e579	1	1	title
+datamart_stockcategorykor	datamart_stockcategorykor_updated_at_4bf31f91	1	1	updated_at
+datamart_stockcategorykor	PRIMARY	0	1	id
+marker
+##### CREATE: etf_integration #####
+*************************** 1. row ***************************
+       Table: etf_integration
+Create Table: CREATE TABLE `etf_integration` (
+  `symbol` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Ticker symbol and stock symbol is an abbreviation used to uniquely identify publicly traded stock or security on a stock exchange',
+  `symbol_id` bigint NOT NULL,
+  `name` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name_ko` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(2500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `domicile` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Shows which country the stock or ETF is registered, listed or traded.',
+  `sec_type` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'It explains the feature, structure or investmesnt characteristics of each security. It is a type of asset class or classification.',
+  `first_trading_date` date DEFAULT NULL,
+  `symbol_deleted_at` datetime(6) DEFAULT NULL,
+  `status` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'It shows whether the security is tradeable or not.',
+  `expense` double DEFAULT NULL,
+  `detail_deleted_at` datetime(6) DEFAULT NULL,
+  `bench_mark` varchar(800) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `leverage_power` double DEFAULT NULL,
+  `origin_etf` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_inverse` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_leveraged` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_keyword` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `etf_keyword` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pension` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mgmt_strategy` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expense_misc` double DEFAULT NULL,
+  `expense_transaction` double DEFAULT NULL,
+  `total_expense` double DEFAULT NULL,
+  `fund_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax_treatment` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `index_replication` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `marketcap` double DEFAULT NULL COMMENT 'The total value of a company''s outstanding shares in the market, calculated by multiplying the current stock price by the number of shares.',
+  `nav` double DEFAULT NULL COMMENT 'represents the per-share value of all the underlying assets (Net Asset Value)',
+  `divdend_yield` double DEFAULT NULL COMMENT 'The annual dividend payout per share as a percentage of the current stock price.',
+  `week52high` double DEFAULT NULL COMMENT 'The highest price at which the stock traded over the past 52 weeks.',
+  `week52high_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'The specific date on which the stock reached its 52-week high.',
+  `week52low` double DEFAULT NULL COMMENT 'The lowest price at which the stock traded over the past 52 weeks.',
+  `week52low_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'The specific date on which the stock reached its 52-week low.',
+  `avg_10_volume` double DEFAULT NULL COMMENT 'The average number of shares traded per day over the last 10 trading days.',
+  `avg_20_volume` double DEFAULT NULL COMMENT 'The average number of shares traded per day over the last 20 trading days.',
+  `avg_40_volume` double DEFAULT NULL,
+  `avg_60_volume` double DEFAULT NULL COMMENT 'The average number of shares traded per day over the last 60 trading days.',
+  `avg_120_volume` double DEFAULT NULL COMMENT 'The average number of shares traded per day over the last 120 trading days.',
+  `avg_10_amount` double DEFAULT NULL COMMENT 'The average amount of money traded per day over the last 10 trading days.',
+  `avg_20_amount` double DEFAULT NULL COMMENT 'The average amount of money traded per day over the last 20 trading days.',
+  `avg_40_amount` double DEFAULT NULL,
+  `avg_60_amount` double DEFAULT NULL COMMENT 'The average amount of money traded per day over the last 60 trading days.',
+  `avg_120_amount` double DEFAULT NULL COMMENT 'The average amount of money traded per day over the last 120 trading days.',
+  `day_10_moving_avg` double DEFAULT NULL COMMENT 'The average closing price of the stock over the past 10 trading days, smoothing out short-term price fluctuations.',
+  `day_20_moving_avg` double DEFAULT NULL COMMENT 'The average closing price of the stock over the past 20 trading days, indicating a short-to-medium term trend.',
+  `day_40_moving_avg` double DEFAULT NULL,
+  `day_60_moving_avg` double DEFAULT NULL COMMENT 'The average closing price of the stock over the past 60 trading days, indicating a medium-term trend.',
+  `day_120_moving_avg` double DEFAULT NULL COMMENT 'The average closing price of the stock over the past 120 trading days, indicating a longer-term trend.',
+  `dumped_at` datetime(6) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+marker
+##### CREATE: datamart_etfholderkor #####
+*************************** 1. row ***************************
+       Table: datamart_etfholderkor
+Create Table: CREATE TABLE `datamart_etfholderkor` (
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `symbol` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'It is a ticker or symbol that holds individual securities or assets.',
+  `item_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'It is a ticker or symbol of individual securities or assets that are held by the ETF as its holdings.',
+  `weight_percentage` double DEFAULT NULL COMMENT 'The proportion of each individual asset within the total portfolio of the ETF, expressed as a percentage. This metric is crucial for understanding how much influence each holding has on the ETF''s overall performance. ;;;%',
+  `shares_number` double DEFAULT NULL COMMENT 'Number of shares or securities that are held by the ETF',
+  `market_value` double DEFAULT NULL COMMENT 'Market value of shares or securities that are held by the ETF',
+  `created_at` datetime(6) NOT NULL,
+  `asset` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Represents the ticker and nature of holdings. When the value is ''-1'', it indicates unlisted securities, otherwise it indicates listed securities.',
+  `dumped_at` datetime(6) DEFAULT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `datamart_etfholderkor_etf_symbol_026456ae` (`symbol`),
+  KEY `datamart_etfholderkor_item_name_94bb787c` (`item_name`),
+  KEY `datamart_etfholderkor_created_at_8e87f9d1` (`created_at`),
+  KEY `datamart_etfholderkor_asset_2e8103e5` (`asset`),
+  KEY `datamart_etfholderkor_dumped_at_5545c185` (`dumped_at`),
+  KEY `datamart_etfholderkor_deleted_at_e42e0265` (`deleted_at`),
+  KEY `datamart_etfholderkor_updated_at_40aa2201` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+marker
+##### CREATE: datamart_etfsectorweightkor #####
+*************************** 1. row ***************************
+       Table: datamart_etfsectorweightkor
+Create Table: CREATE TABLE `datamart_etfsectorweightkor` (
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `symbol` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'It is a ticker or symbol that holds individual securities or assets.',
+  `sector_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Shows the specific name of the sector, typically using an established sector classification system',
+  `weight_percentage` double DEFAULT NULL COMMENT 'the proportion of an ETF''s assets invested in each market sector. ;;;%',
+  `created_at` datetime(6) NOT NULL,
+  `dumped_at` datetime(6) DEFAULT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `datamart_etfsectorweightkor_etf_symbol_d4027b19` (`symbol`),
+  KEY `datamart_etfsectorweightkor_sector_name_608c117a` (`sector_name`),
+  KEY `datamart_etfsectorweightkor_created_at_c55737e1` (`created_at`),
+  KEY `datamart_etfsectorweightkor_dumped_at_16ac50a0` (`dumped_at`),
+  KEY `datamart_etfsectorweightkor_deleted_at_a87f3b2d` (`deleted_at`),
+  KEY `datamart_etfsectorweightkor_updated_at_adca7496` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+marker
+##### CREATE: datamart_stockcategorykor #####
+*************************** 1. row ***************************
+       Table: datamart_stockcategorykor
+Create Table: CREATE TABLE `datamart_stockcategorykor` (
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `rep_symbol` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'used as a symbol or ticker to represent each theme or category.',
+  `search_tag` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'used as a keyword describing, identifying or searching for the theme or category.',
+  `dumped_at` datetime(6) DEFAULT NULL,
+  `symbol` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Shows the specific tiker of the theme or category.',
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `datamart_stockcategorykor_title_12b5e579` (`title`),
+  KEY `datamart_stockcategorykor_description_1d75368c` (`description`),
+  KEY `datamart_stockcategorykor_created_at_c419a183` (`created_at`),
+  KEY `datamart_stockcategorykor_rep_symbol_2a67312a` (`rep_symbol`),
+  KEY `datamart_stockcategorykor_search_tag_85ba6cd4` (`search_tag`),
+  KEY `datamart_stockcategorykor_dumped_at_6973696e` (`dumped_at`),
+  KEY `datamart_stockcategorykor_symbol_db26ea6f` (`symbol`),
+  KEY `datamart_stockcategorykor_deleted_at_a3345e6f` (`deleted_at`),
+  KEY `datamart_stockcategorykor_updated_at_4bf31f91` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+marker
+##### ROW COUNTS #####
+table_name	rows_cnt
+etf_integration	1219
+datamart_etfholderkor	75016
+datamart_etfsectorweightkor	8744
+datamart_stockcategorykor	1477
+marker
+##### SAMPLE: etf_integration #####
+*************************** 1. row ***************************
+             symbol: 069500
+          symbol_id: 29621910
+               name: KODEX 200
+            name_ko: KODEX 200
+        description: 
+           domicile:  is a security listed in the Republic of Korea.
+           sec_type:  means an exchange-traded fund.
+ first_trading_date: 2002-10-14
+  symbol_deleted_at: NULL
+             status: active
+            expense: 0.15
+  detail_deleted_at: NULL
+         bench_mark: 코스피 200
+     leverage_power: 1
+         origin_etf: 069500
+         is_inverse:  is not an inverse product
+       is_leveraged:  is not a leveraged product
+    product_keyword: KOSPI200지수 구성종목@시가총액
+        etf_keyword: 삼성KODEX200증권상장지수투자신탁[주식]@KOSPI200@주가지수선물
+            pension: rp
+      mgmt_strategy: 
+       expense_misc: 0.01
+expense_transaction: 0.0287
+      total_expense: 0.1887
+          fund_type: 주식형
+      tax_treatment: 비과세
+  index_replication: physical
+          marketcap: 27030262500000
+                nav: 123879.35
+      divdend_yield: 0.67
+         week52high: 143645
+    week52high_date: 20260602
+          week52low: 38200
+     week52low_date: 20250613
+      avg_10_volume: 21443741
+      avg_20_volume: 22331642
+      avg_40_volume: 20873832
+      avg_60_volume: 20641362
+     avg_120_volume: 19334850
+      avg_10_amount: 2810102572376
+      avg_20_amount: 2811169205643
+      avg_40_amount: 2413611684809
+      avg_60_amount: 2168589739433
+     avg_120_amount: 1771802212704
+  day_10_moving_avg: 131487
+  day_20_moving_avg: 126442
+  day_40_moving_avg: 114034
+  day_60_moving_avg: 103679
+ day_120_moving_avg: 88197
+          dumped_at: 2026-06-12 16:10:04.000000
+*************************** 2. row ***************************
+             symbol: 069660
+          symbol_id: 29621913
+               name: KIWOOM 200
+            name_ko: KIWOOM 200
+        description: 
+           domicile:  is a security listed in the Republic of Korea.
+           sec_type:  means an exchange-traded fund.
+ first_trading_date: 2002-10-14
+  symbol_deleted_at: NULL
+             status: active
+            expense: 0.05
+  detail_deleted_at: NULL
+         bench_mark: 코스피 200
+     leverage_power: 1
+         origin_etf: 069660
+         is_inverse:  is not an inverse product
+       is_leveraged:  is not a leveraged product
+    product_keyword: KOSPI200 지수는 한국거래소에서 전체 상장종목에서 200종목만으로 산출하는 주가지수@시장대표성@업종대표성@유동성
+        etf_keyword: KOSPI200 지수@키움 KIWOOM 200 상장지수증권투자신탁[주식]@인덱스펀드@국내주식
+            pension: rp
+      mgmt_strategy: 
+       expense_misc: 0.02
+expense_transaction: 0.0266
+      total_expense: 0.0966
+          fund_type: 주식형
+      tax_treatment: 비과세
+  index_replication: physical
+          marketcap: 812658000000
+                nav: 123760.19
+      divdend_yield: 0.76
+         week52high: 143390
+    week52high_date: 20260602
+          week52low: 38113
+     week52low_date: 20250613
+      avg_10_volume: 345910
+      avg_20_volume: 380586
+      avg_40_volume: 345456
+      avg_60_volume: 402868
+     avg_120_volume: 433741
+      avg_10_amount: 44840112226
+      avg_20_amount: 47233164371
+      avg_40_amount: 39718239311
+      avg_60_amount: 41052133937
+     avg_120_amount: 38852039509
+  day_10_moving_avg: 131335
+  day_20_moving_avg: 126271
+  day_40_moving_avg: 113872
+  day_60_moving_avg: 103538
+ day_120_moving_avg: 88058
+          dumped_at: 2026-06-12 16:10:04.000000
+*************************** 3. row ***************************
+             symbol: 088260
+          symbol_id: 29621955
+               name: 이리츠코크렙
+            name_ko: 이리츠코크렙
+        description: 
+           domicile:  is a security listed in the Republic of Korea.
+           sec_type:  means a real estate investment trust (REIT).
+ first_trading_date: 2018-06-27
+  symbol_deleted_at: NULL
+             status: active
+            expense: 0
+  detail_deleted_at: NULL
+         bench_mark: 
+     leverage_power: 1
+         origin_etf: 088260
+         is_inverse:  is not an inverse product
+       is_leveraged:  is not a leveraged product
+    product_keyword: 
+        etf_keyword: 구조조정 리츠
+            pension: rp
+      mgmt_strategy: 
+       expense_misc: NULL
+expense_transaction: NULL
+      total_expense: NULL
+          fund_type: 
+      tax_treatment: 
+  index_replication: 
+          marketcap: 234363883000
+                nav: 0
+      divdend_yield: 9.45
+         week52high: 5340
+    week52high_date: 20260427
+          week52low: 3550
+     week52low_date: 20260602
+      avg_10_volume: 326671
+      avg_20_volume: 227034
+      avg_40_volume: 159971
+      avg_60_volume: 120919
+     avg_120_volume: 104017
+      avg_10_amount: 1239859050
+      avg_20_amount: 891336164
+      avg_40_amount: 671819079
+      avg_60_amount: 516649319
+     avg_120_amount: 464059921
+  day_10_moving_avg: 3885
+  day_20_moving_avg: 4093
+  day_40_moving_avg: 4500
+  day_60_moving_avg: 4613
+ day_120_moving_avg: 4668
+          dumped_at: 2026-06-12 16:10:04.000000
+*************************** 4. row ***************************
+             symbol: 091160
+          symbol_id: 29621969
+               name: KODEX 반도체
+            name_ko: KODEX 반도체
+        description: 
+           domicile:  is a security listed in the Republic of Korea.
+           sec_type:  means an exchange-traded fund.
+ first_trading_date: 2006-06-27
+  symbol_deleted_at: NULL
+             status: active
+            expense: 0.45
+  detail_deleted_at: NULL
+         bench_mark: KRX 반도체
+     leverage_power: 1
+         origin_etf: 091160
+         is_inverse:  is not an inverse product
+       is_leveraged:  is not a leveraged product
+    product_keyword: 글로벌산업분류기준(Global Industry Classification Standard. 이하 GICS) 분류체계 중 '반도체' 섹터에 속한 기업들로 구성되어 있음
+        etf_keyword: KRX Semicon 지수@'반도체' 섹터@GICS
+            pension: rp
+      mgmt_strategy: 
+       expense_misc: 0.01
+expense_transaction: 0.0549
+      total_expense: 0.5149
+          fund_type: 주식형
+      tax_treatment: 비과세
+  index_replication: physical
+          marketcap: 6628100000000
+                nav: 157617.42
+      divdend_yield: 0.07
+         week52high: 170900
+    week52high_date: 20260604
+          week52low: 33414
+     week52low_date: 20250616
+      avg_10_volume: 6283348
+      avg_20_volume: 6415607
+      avg_40_volume: 5644669
+      avg_60_volume: 5308329
+     avg_120_volume: 4618027
+      avg_10_amount: 1000677684098
+      avg_20_amount: 997807333843
+      avg_40_amount: 810071703338
+      avg_60_amount: 690721994147
+     avg_120_amount: 512648041100
+  day_10_moving_avg: 158656
+  day_20_moving_avg: 155483
+  day_40_moving_avg: 139646
+  day_60_moving_avg: 125683
+ day_120_moving_avg: 101947
+          dumped_at: 2026-06-12 16:10:04.000000
+*************************** 5. row ***************************
+             symbol: 091170
+          symbol_id: 29621970
+               name: KODEX 은행
+            name_ko: KODEX 은행
+        description: 
+           domicile:  is a security listed in the Republic of Korea.
+           sec_type:  means an exchange-traded fund.
+ first_trading_date: 2006-06-27
+  symbol_deleted_at: NULL
+             status: active
+            expense: 0.3
+  detail_deleted_at: NULL
+         bench_mark: KRX 은행
+     leverage_power: 1
+         origin_etf: 091170
+         is_inverse:  is not an inverse product
+       is_leveraged:  is not a leveraged product
+    product_keyword: '은행' 섹터에 속한 기업들
+        etf_keyword: KRX Banks 지수@'은행' 섹터
+            pension: rp
+      mgmt_strategy: 
+       expense_misc: 0.01
+expense_transaction: 0.0237
+      total_expense: 0.3337
+          fund_type: 주식형
+      tax_treatment: 비과세
+  index_replication: physical
+          marketcap: 509958000000
+                nav: 14840.82
+      divdend_yield: 3.8
+         week52high: 17487
+    week52high_date: 20260223
+          week52low: 10080
+     week52low_date: 20250613
+      avg_10_volume: 2488298
+      avg_20_volume: 1718553
+      avg_40_volume: 1542387
+      avg_60_volume: 1284996
+     avg_120_volume: 1309671
+      avg_10_amount: 37060019187
+      avg_20_amount: 25661453982
+      avg_40_amount: 23618686827
+      avg_60_amount: 19591079459
+     avg_120_amount: 19578787391
+  day_10_moving_avg: 14921
+  day_20_moving_avg: 14941
+  day_40_moving_avg: 15338
+  day_60_moving_avg: 15178
+ day_120_moving_avg: 14516
+          dumped_at: 2026-06-12 16:10:04.000000
+marker
+##### SAMPLE: datamart_etfholderkor #####
+*************************** 1. row ***************************
+               id: 00001c18b65922abcefe0db2f11523f3b8082532bac77e24b26274b601e0c516
+           symbol: 448290
+        item_name: CRH public limited company
+weight_percentage: 0.1
+    shares_number: 5.94
+     market_value: 907984
+       created_at: 2026-06-12 06:51:22.147069
+            asset: CRH
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:22.147069
+*************************** 2. row ***************************
+               id: 0002f1164c7dde789b656655029748ad7f07333803bfdee865d3323c839bc89b
+           symbol: 0093D0
+        item_name: Seagate Technology Holdings PLC
+weight_percentage: 3.3
+    shares_number: 25.19
+     market_value: 31426215
+       created_at: 2026-06-12 06:51:14.747144
+            asset: STX
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:14.747144
+*************************** 3. row ***************************
+               id: 00032e9e95e176f52582d9544e314c638cfbcb0dd6bc3403e8e9b6b21f091774
+           symbol: 292500
+        item_name: 두산밥캣
+weight_percentage: 0.07
+    shares_number: 67
+     market_value: 4314800
+       created_at: 2026-06-12 06:51:17.852992
+            asset: 241560
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:17.852992
+*************************** 4. row ***************************
+               id: 0003731014c1fe1b15c1a955d9e198f9b26e7b43a2dfa60f744782646122f21a
+           symbol: 0162M0
+        item_name: 국민은행(CD)
+weight_percentage: 2.79
+    shares_number: 0
+     market_value: 2779053
+       created_at: 2026-06-12 06:51:14.823506
+            asset: -1
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:14.823506
+*************************** 5. row ***************************
+               id: 0004867344068a52968c5ad9d04fb84f97930c787d5b152547de8854101216c8
+           symbol: 444490
+        item_name: Steel Dynamics, Inc.
+weight_percentage: 0.05
+    shares_number: 1.5
+     market_value: 615397
+       created_at: 2026-06-12 06:51:22.146284
+            asset: STLD
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:22.146284
+marker
+##### SAMPLE: datamart_etfsectorweightkor #####
+*************************** 1. row ***************************
+               id: 0001e87eb0ba49f6a6e76c7caae3746966e1cdd11d673e50edb48a25c397c4c9
+           symbol: 305050
+      sector_name: IT
+weight_percentage: 58.8899
+       created_at: 2026-06-12 06:51:06.438053
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:06.438053
+*************************** 2. row ***************************
+               id: 0003220a63ef610e167473aa9e646c226b75a035807b3dc9463a422f1fe6ffbb
+           symbol: 281990
+      sector_name: IT
+weight_percentage: 4.24
+       created_at: 2026-06-12 06:51:06.364459
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:06.364459
+*************************** 3. row ***************************
+               id: 001b69bd37e097f99fbc0bca9242f2c9e6b748aa9fe03e08561b6fd83455e639
+           symbol: 306950
+      sector_name: 원자재
+weight_percentage: 0.22
+       created_at: 2026-06-12 06:51:06.438265
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:06.438265
+*************************** 4. row ***************************
+               id: 0031180525a48b63c531db08071625ff98f3b95dd1bf0a03ff7882a63c62628b
+           symbol: 473490
+      sector_name: 현금
+weight_percentage: 0.03
+       created_at: 2026-06-12 06:51:06.441719
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:06.441720
+*************************** 5. row ***************************
+               id: 0035109542510391a26870ce67a17973893af2848ad5ce0c974210f080052309
+           symbol: 233160
+      sector_name: 기타 제조
+weight_percentage: 0.7599
+       created_at: 2026-06-12 06:51:06.361296
+        dumped_at: 2026-06-12 16:10:05.000000
+       deleted_at: NULL
+       updated_at: 2026-06-12 06:51:06.361296
+marker
+##### SAMPLE: datamart_stockcategorykor #####
+*************************** 1. row ***************************
+         id: 007a195482ba07fd6a3bb55398c7c796bd1d8bf51d4249aad7b1d719c6ec51ae
+      title: 농산물
+description: null
+ created_at: 2026-06-12 06:51:04.736841
+ rep_symbol: 271060
+ search_tag: 농산물
+  dumped_at: 2026-06-12 16:10:27.000000
+     symbol: 437370
+ deleted_at: NULL
+ updated_at: 2026-06-12 06:51:04.736841
+*************************** 2. row ***************************
+         id: 00d3c00866a628e7212cd179bd63266ca94454e41e8f0d4812d7a351351bd22d
+      title: 인공지능
+description: 
+ created_at: 2026-06-12 06:51:04.736891
+ rep_symbol: 490090
+ search_tag: 인공지능
+  dumped_at: 2026-06-12 16:10:27.000000
+     symbol: 461340
+ deleted_at: NULL
+ updated_at: 2026-06-12 06:51:04.736891
+*************************** 3. row ***************************
+         id: 00d3c4917eb52ee72b0a4fbf1a6fb70960e9adef2a7ce084a6f81d595f1db14c
+      title: 양자 컴퓨터
+description: 양자 컴퓨터 섹터에 집중 투자
+ created_at: 2026-06-12 06:51:04.735744
+ rep_symbol: 
+ search_tag: 양자컴퓨터@양자컴퓨팅@퀀텀@퀀텀컴퓨팅
+  dumped_at: 2026-06-12 16:10:27.000000
+     symbol: 498270
+ deleted_at: NULL
+ updated_at: 2026-06-12 06:51:04.735744
+*************************** 4. row ***************************
+         id: 00efc8cef489f438abef5079036ff064d7c95a1d4e3c3c378c980427161ccf24
+      title: IT
+description: IT
+ created_at: 2026-06-12 06:51:04.737086
+ rep_symbol: 157490
+ search_tag: IT
+  dumped_at: 2026-06-12 16:10:27.000000
+     symbol: 438320
+ deleted_at: NULL
+ updated_at: 2026-06-12 06:51:04.737086
+*************************** 5. row ***************************
+         id: 01154cb639d5f3a57dcccb63a015768bf64623db0490105dfc291e66a42de697
+      title: 은
+description: null
+ created_at: 2026-06-12 06:51:04.736531
+ rep_symbol: 144600
+ search_tag: 은
+  dumped_at: 2026-06-12 16:10:27.000000
+     symbol: 530090
+ deleted_at: NULL
+ updated_at: 2026-06-12 06:51:04.736531

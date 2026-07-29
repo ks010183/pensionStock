@@ -1,0 +1,262 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+marker
+##### COLUMNS #####
+TABLE_NAME	ORDINAL_POSITION	COLUMN_NAME	COLUMN_TYPE	IS_NULLABLE	COLUMN_KEY	COLUMN_COMMENT
+datamart_symbolkor	1	id	bigint	NO	PRI	
+datamart_symbolkor	2	symbol	varchar(50)	YES	UNI	Ticker symbol and stock symbol is an abbreviation used to uniquely identify publicly traded stock or security on a stock exchange
+datamart_symbolkor	3	name	varchar(500)	YES	MUL	
+datamart_symbolkor	4	name_ko	varchar(500)	YES	MUL	
+datamart_symbolkor	5	order_rank	int	YES		The importance and popularity of security. The lower the number is, the more important it is
+datamart_symbolkor	6	tag	varchar(200)	YES		A tag is a metadata tag
+datamart_symbolkor	7	description_ko	varchar(2500)	YES		
+datamart_symbolkor	8	cusip	varchar(50)	YES	MUL	A CUSIP number is a unique identification number assigned to stocks and registered bonds in the United States and Canada
+datamart_symbolkor	9	isin	varchar(50)	YES	MUL	An International Securities Identification Number (ISIN) is a 12-digit alphanumeric code that uniquely identifies a specific security
+datamart_symbolkor	10	domicile	varchar(500)	YES		Shows which country the stock or ETF is registered, listed or traded.
+datamart_symbolkor	11	sec_type	varchar(500)	YES		It explains the feature, structure or investmesnt characteristics of each security. It is a type of asset class or classification.
+datamart_symbolkor	12	first_trading_date	date	YES	MUL	
+datamart_symbolkor	13	created_at	datetime(6)	YES	MUL	
+datamart_symbolkor	14	updated_at	datetime(6)	YES	MUL	
+datamart_symbolkor	15	deleted_at	datetime(6)	YES	MUL	
+datamart_symbolkor	16	status	varchar(500)	YES		It shows whether the security is tradeable or not.
+datamart_symbolkor	17	dumped_at	datetime(6)	YES	MUL	
+datamart_symbolus	1	id	bigint	NO	PRI	
+datamart_symbolus	2	symbol	varchar(50)	YES	UNI	Ticker symbol and stock symbol is an abbreviation used to uniquely identify publicly traded stock or security on a stock exchange
+datamart_symbolus	3	name	varchar(500)	YES	MUL	
+datamart_symbolus	4	name_ko	varchar(500)	YES	MUL	
+datamart_symbolus	5	order_rank	int	YES		The importance and popularity of security. The lower the number is, the more important it is
+datamart_symbolus	6	tag	varchar(200)	YES		A tag is a metadata tag
+datamart_symbolus	7	description_ko	varchar(2500)	YES		
+datamart_symbolus	8	cusip	varchar(50)	YES	MUL	A CUSIP number is a unique identification number assigned to stocks and registered bonds in the United States and Canada
+datamart_symbolus	9	isin	varchar(50)	YES	MUL	An International Securities Identification Number (ISIN) is a 12-digit alphanumeric code that uniquely identifies a specific security
+datamart_symbolus	10	domicile	varchar(500)	YES		Shows which country the stock or ETF is registered, listed or traded.
+datamart_symbolus	11	sec_type	varchar(500)	YES		It explains the feature, structure or investmesnt characteristics of each security. It is a type of asset class or classification.
+datamart_symbolus	12	first_trading_date	date	YES	MUL	
+datamart_symbolus	13	created_at	datetime(6)	YES	MUL	
+datamart_symbolus	14	updated_at	datetime(6)	YES	MUL	
+datamart_symbolus	15	deleted_at	datetime(6)	YES	MUL	
+datamart_symbolus	16	status	varchar(500)	YES		It shows whether the security is tradeable or not.
+datamart_symbolus	17	dumped_at	datetime(6)	YES	MUL	
+marker
+##### ROW COUNTS #####
+t	c
+datamart_symbolkor	4872
+datamart_symbolus	21003
+marker
+##### sec_type 분포: symbolkor #####
+sec_type	c
+ is a general stock symbol and stock ticker.	2914
+ means an exchange-traded fund.	1268
+ means an exchange-traded note.	665
+ means a real estate investment trust (REIT).	25
+marker
+##### sec_type 분포: symbolus #####
+sec_type	c
+ is a general stock symbol and stock ticker.	13830
+ means an exchange-traded fund.	6107
+ means it is a type of ETFs whose underlying asset is a single stock.	478
+	469
+ means an exchange-traded note.	119
+marker
+##### SAMPLE: symbolkor (삼성전자 검색) #####
+*************************** 1. row ***************************
+                id: 29621539
+            symbol: 005930
+              name: 삼성전자
+           name_ko: 삼성전자
+        order_rank: 1
+               tag: 
+    description_ko: 비메모리 반도체 세계 1위
+             cusip: 
+              isin: KR7005930003
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1975-06-11
+        created_at: 2022-09-20 14:57:44.000000
+        updated_at: 2026-06-12 06:51:02.745033
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:27.000000
+marker
+##### SAMPLE: symbolkor 5행 #####
+*************************** 1. row ***************************
+                id: 29621238
+            symbol: 000020
+              name: 동화약품
+           name_ko: 동화약품
+        order_rank: 0
+               tag: 
+    description_ko: 
+             cusip: 
+              isin: KR7000020008
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1976-03-24
+        created_at: 2022-09-20 14:57:44.308386
+        updated_at: 2026-06-12 06:51:02.744579
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:27.000000
+*************************** 2. row ***************************
+                id: 29621239
+            symbol: 000040
+              name: KR모터스
+           name_ko: KR모터스
+        order_rank: 0
+               tag: 
+    description_ko: 
+             cusip: 
+              isin: KR7000040006
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1976-05-25
+        created_at: 2022-09-20 14:57:44.308667
+        updated_at: 2026-06-12 06:51:02.744615
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:27.000000
+*************************** 3. row ***************************
+                id: 29621240
+            symbol: 000050
+              name: 경방
+           name_ko: 경방
+        order_rank: 0
+               tag: 
+    description_ko: 
+             cusip: 
+              isin: KR7000050005
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1956-03-03
+        created_at: 2022-09-20 14:57:44.308679
+        updated_at: 2026-06-12 06:51:02.744617
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:27.000000
+*************************** 4. row ***************************
+                id: 29621241
+            symbol: 000060
+              name: 메리츠화재
+           name_ko: 메리츠화재
+        order_rank: 0
+               tag: 
+    description_ko: 
+             cusip: 
+              isin: KR7000060004
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: NULL
+        created_at: 2022-09-20 14:57:44.308683
+        updated_at: 2026-06-12 06:51:02.744618
+        deleted_at: 2026-04-21 21:40:00.354322
+            status: inactive
+         dumped_at: 2026-06-12 16:10:27.000000
+*************************** 5. row ***************************
+                id: 29621242
+            symbol: 000070
+              name: 삼양홀딩스
+           name_ko: 삼양홀딩스
+        order_rank: 0
+               tag: 
+    description_ko: 
+             cusip: 
+              isin: KR7000070003
+          domicile:  is a security listed in the Republic of Korea.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1968-12-27
+        created_at: 2022-09-20 14:57:44.308688
+        updated_at: 2026-06-12 06:51:02.744620
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:27.000000
+marker
+##### SAMPLE: symbolus 5행 #####
+*************************** 1. row ***************************
+                id: 1
+            symbol: GLTR
+              name: abrdn Physical Precious Metals Basket Shares ETF
+           name_ko: 애버딘 스탠다드 귀금속 바스켓
+        order_rank: 5
+               tag: 원자재
+    description_ko: 원자재 금, 백금, 팔라듐 투자
+             cusip: 003263100
+              isin: US0032631006
+          domicile:  is a security listed on stock exchange e.g. NYSE, Nasdaq, CBOE in the USA.
+          sec_type:  means an exchange-traded fund.
+first_trading_date: 2010-10-22
+        created_at: 2022-06-07 18:19:51.000000
+        updated_at: 2026-06-12 04:02:21.741110
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:28.000000
+*************************** 2. row ***************************
+                id: 2
+            symbol: TTD
+              name: Trade Desk, Inc. Class A
+           name_ko: 트레이드 데스크
+        order_rank: 3
+               tag: 
+    description_ko: 
+             cusip: 88339J105
+              isin: US88339J1051
+          domicile:  is a security listed on stock exchange e.g. NYSE, Nasdaq, CBOE in the USA.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 2016-09-21
+        created_at: 2020-06-02 00:00:00.000000
+        updated_at: 2026-06-12 04:02:21.741112
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:28.000000
+*************************** 3. row ***************************
+                id: 3
+            symbol: OMC
+              name: Omnicom Group Inc
+           name_ko: 옴니콤 그룹
+        order_rank: 4
+               tag: 
+    description_ko: 
+             cusip: 681919106
+              isin: US6819191064
+          domicile:  is a security listed on stock exchange e.g. NYSE, Nasdaq, CBOE in the USA.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1980-03-17
+        created_at: 2020-06-02 00:00:00.000000
+        updated_at: 2026-06-12 04:02:21.741114
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:28.000000
+*************************** 4. row ***************************
+                id: 4
+            symbol: WPP
+              name: WPP Plc Sponsored ADR
+           name_ko: WPP(ADR)
+        order_rank: 4
+               tag: 
+    description_ko: WPP PLC는 통신 서비스의 제공에 종사. 그것은 다음과 같은 세그먼트를 통해 운영 : 글로벌 통합 기관; 섭외; 및 전문 기관. 이 회사는 1985 년에 설립되었으며 런던, 영국에 본사를두고있다.
+             cusip: 92937A102
+              isin: US92937A1025
+          domicile:  is a security listed on stock exchange e.g. NYSE, Nasdaq, CBOE in the USA.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1987-12-29
+        created_at: 2020-06-02 00:00:00.000000
+        updated_at: 2026-06-12 04:02:21.741116
+        deleted_at: NULL
+            status: active
+         dumped_at: 2026-06-12 16:10:28.000000
+*************************** 5. row ***************************
+                id: 5
+            symbol: IPG_D@2025-11-28
+              name: Interpublic Group of Companies, Inc.
+           name_ko: 인터퍼블릭 그룹 오브 컴퍼니스
+        order_rank: 5
+               tag: 
+    description_ko: 
+             cusip: 460690100
+              isin: US4606901001
+          domicile:  is a security listed on stock exchange e.g. NYSE, Nasdaq, CBOE in the USA.
+          sec_type:  is a general stock symbol and stock ticker.
+first_trading_date: 1980-03-17
+        created_at: 2020-06-02 00:00:00.000000
+        updated_at: 2026-06-12 04:02:21.741118
+        deleted_at: 2025-11-28 21:04:21.824808
+            status: inactive
+         dumped_at: 2026-06-12 16:10:28.000000

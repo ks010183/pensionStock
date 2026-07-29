@@ -1,0 +1,90 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+marker
+##### pension 분포 #####
+pension	cnt
+rp	1006
+	175
+p	38
+marker
+##### fund_type 분포 #####
+fund_type	cnt
+주식형	616
+	199
+채권형	123
+주식파생형	115
+혼합채권형	34
+재간접형	34
+특별자산파생	31
+채권파생형	19
+혼합채권파생형	14
+부동산	9
+특별자산	7
+재간접파생형	7
+부동산파생형	5
+혼합주식파생형	3
+혼합주식형	2
+혼합자산	1
+marker
+##### sec_type 분포 #####
+sec_type	cnt
+ means an exchange-traded fund.	1037
+NULL	159
+ means a real estate investment trust (REIT).	23
+marker
+##### status 분포 #####
+status	cnt
+active	1060
+NULL	159
+marker
+##### tax_treatment 분포 #####
+tax_treatment	cnt
+배당소득세 - 보유기간	666
+비과세	359
+	173
+배당소득세 - 해외주식투자전용	11
+배당소득세 - 분리과세	8
+배당소득 - 분리과세	1
+배당소득 - 보유기간	1
+marker
+##### leverage/inverse 분포 #####
+leverage_power	is_leveraged	is_inverse	cnt
+1	 is not a leveraged product	 is not an inverse product	1169
+0	 is not a leveraged product	 is not an inverse product	36
+2	 is not a leveraged product	 is not an inverse product	11
+-2	 is not a leveraged product	 is not an inverse product	2
+-1	 is not a leveraged product	 is not an inverse product	1
+marker
+##### 연금 유니버스 통과 상품 수 #####
+universe_cnt
+1005
+marker
+##### fund_type=채권형 예시 20건 #####
+symbol	name_ko	fund_type	bench_mark
+114100	RISE 국고채3년	채권형	KTB INDEX(시장가격)
+114260	KODEX 국고채3년	채권형	MKF 국고채지수(총수익)
+114460	ACE 국고채3년	채권형	KTB INDEX(시장가격)
+114470	KIWOOM 국고채3년	채권형	KTB INDEX(시장가격)
+114820	TIGER 국채3년	채권형	KTB INDEX(시장가격)
+122260	KIWOOM 통안채1년	채권형	MK 통안채지수(총수익)
+130730	KIWOOM 단기자금	채권형	MK 머니마켓 지수(총수익)
+136340	RISE 중기우량회사채	채권형	KOBI 크레딧 지수(총수익)
+148070	KIWOOM 국고채10년	채권형	KIS 10년 국고채 지수 (총수익)
+152380	KODEX 국채선물10년	채권파생형	10년국채선물지수
+153130	KODEX 단기채권	채권형	KRW Cash 지수(총수익)
+157450	TIGER 단기통안채	채권형	KIS MSB 6M(총수익)
+182490	TIGER 단기선진하이일드(합성 H)	채권파생형	Markit iBoxx USD Liquid High Yield 0-5 year 지수
+183700	RISE 200채권혼합50	혼합채권파생형	주식국채혼합(채권형)지수
+190620	ACE 단기통안채	채권형	KIS MSB 단기지수(총수익)
+196230	RISE 단기통안채	채권형	KIS 통안채 5개월 지수(총수익)
+214980	KODEX 단기채권PLUS	채권형	KRW Cash PLUS 지수(총수익)
+237370	KODEX 코리아배당성장채권혼합	혼합채권형	배당성장채권혼합지수
+237440	TIGER 경기방어채권혼합	혼합채권형	경기방어소비재 채권혼합 지수
+238670	PLUS 스마트베타Quality채권혼합	혼합채권파생형	WISE-KAP 스마트베타 Quality 채권혼합지수
+marker
+##### 가격정보 없는 상품 수 (day_10_moving_avg, nav 모두 NULL/0) #####
+no_price_cnt
+0
+marker
+##### 테마 심볼 유형 확인 (theme symbol 이 ETF 인 비율) #####
+symbol_is_etf	total
+991	1477

@@ -3,5 +3,4 @@ dist/
 __pycache__/
 *.pyc
 .env
-/db/
 /etf_db/

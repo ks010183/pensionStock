@@ -84,7 +84,8 @@ ENGINE=InnoDB, CHARSET=utf8mb4 (COLLATE utf8mb4_0900_ai_ci). 인덱스/PK 없음
 | `week52high_date` / `week52low_date` | varchar(50) | 해당 일자 (`YYYYMMDD` 문자열) |
 | `avg_{10,20,40,60,120}_volume` | double | N일 평균 거래량 |
 | `avg_{10,20,40,60,120}_amount` | double | N일 평균 거래대금(원) |
-| `day_{10,20,40,60,120}_moving_avg` | double | N일 이동평균 종가(원) — **현재가 근사값으로 `day_10_moving_avg` 사용 가능** |
+| `day_{10,20,40,60,120}_moving_avg` | double | N일 이동평균 종가(원) |
+| `last_price` | double | **종가(원) — 매매 주수·비율 계산의 기준가 (2026-08 추가)**. 백엔드는 last_price → day_10_moving_avg → nav 순으로 사용 |
 | `dumped_at` | datetime(6) | 적재 시각 |
 
 ---
@@ -152,7 +153,7 @@ ETF 1개 → 섹터 N행. ENGINE=InnoDB, CHARSET=utf8mb4_unicode_ci.
 
 | 데모 테이블 | 실제 테이블 | 매핑 메모 |
 |---|---|---|
-| `etfs` | `etf_integration` | `etf_code→symbol`, `etf_name→name_ko`, `expense_ratio→expense`, `close_price→day_10_moving_avg`(근사) 또는 `nav`. **asset_class(위험/안전)** 는 `fund_type`/키워드/벤치마크 기반 규칙 필요. **연금 매매 가능**은 `pension` 값과 `status='active'` 로 필터 |
+| `etfs` | `etf_integration` | `etf_code→symbol`, `etf_name→name_ko`, `expense_ratio→expense`, `close_price→last_price`(종가, 없으면 day_10_moving_avg→nav 폴백). **asset_class(위험/안전)** 는 `fund_type`/키워드/벤치마크 기반 규칙 필요. **연금 매매 가능**은 `pension` 값과 `status='active'` 로 필터 |
 | `etf_holdings` | `datamart_etfholderkor` | `stock_code→asset`(티커) / `stock_name→item_name`, `weight→weight_percentage`. `deleted_at IS NULL` 필터 |
 | `sectors`+`stocks.sector_id` | `datamart_etfsectorweightkor` | 실제 DB 는 **종목 섹터가 아닌 ETF 섹터 비중** — "같은 섹터 종목" 도구는 "섹터 비중이 유사한 ETF" 또는 홀딩 교차 기반으로 재정의 필요 |
 | `themes`+`stock_themes` | `datamart_stockcategorykor` | `title→테마명`, `symbol/rep_symbol→관련 티커`, `search_tag` 로 키워드 검색 |

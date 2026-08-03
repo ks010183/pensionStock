@@ -41,7 +41,8 @@ _UNIVERSE_WHERE = """
 _ETF_COLS = """
     e.symbol, COALESCE(NULLIF(e.name_ko, ''), e.name, e.symbol) AS etf_name,
     e.fund_type, e.bench_mark, e.etf_keyword, e.product_keyword,
-    e.expense, e.total_expense, e.marketcap, e.nav, e.day_10_moving_avg, e.pension
+    e.expense, e.total_expense, e.marketcap, e.nav,
+    e.last_price, e.day_10_moving_avg, e.pension
 """
 
 
@@ -70,8 +71,12 @@ def classify_asset_class(row: dict) -> str:
 
 
 def _close_price(row: dict) -> int | None:
-    """기준가 근사: 10일 이동평균가 → NAV 순. 둘 다 없으면 None(매수 불가)."""
-    for key in ("day_10_moving_avg", "nav"):
+    """매매 기준가: 종가(last_price) 우선, 없으면 10일 이동평균가 → NAV 근사.
+
+    last_price 는 해당 ETF 의 실제 종가 컬럼으로, 매수 주수 계산과
+    비율(트래킹) 계산에 이 값을 사용한다.
+    """
+    for key in ("last_price", "day_10_moving_avg", "nav"):
         v = row.get(key)
         if v is not None and float(v) > 0:
             return int(round(float(v)))

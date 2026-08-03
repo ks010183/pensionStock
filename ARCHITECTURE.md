@@ -126,7 +126,7 @@ pensionStock/
 |---|---|---|
 | `_UNIVERSE_WHERE` (모듈 상수) | 연금 매매가능 ETF 공통 필터 | active + ETF타입 + pension + 비레버리지/인버스 |
 | `classify_asset_class(row)` | RISK/SAFE 판정 | fund_type ∈ SAFE_FUND_TYPES → 이름/키워드 매칭 |
-| `_close_price(row)` | 기준가 근사 | day_10_moving_avg → nav, 없으면 None(후보 제외) |
+| `_close_price(row)` | 매매 기준가 | last_price(종가) → day_10_moving_avg → nav, 없으면 None(후보 제외) |
 | `find_stock(q)` | 종목 검색 | holder 테이블 asset/item_name 매칭, 최다편입 우선 |
 | `dominant_sector_for_stock(code)` | 종목 섹터 추정 | 편입 ETF들의 섹터비중 × 편입비중 가중합 |
 | `etfs_containing_stock(q, n)` | MCP 도구① | holder JOIN etf_integration, 비중 내림차순 |

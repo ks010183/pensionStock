@@ -62,7 +62,8 @@ CREATE TABLE etf_integration (
   day_40_moving_avg double DEFAULT NULL,
   day_60_moving_avg double DEFAULT NULL,
   day_120_moving_avg double DEFAULT NULL,
-  dumped_at datetime(6) DEFAULT NULL
+  dumped_at datetime(6) DEFAULT NULL,
+  last_price double DEFAULT NULL              -- 종가 (실제 DB 에 추가된 컬럼)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE datamart_etfholderkor (
@@ -365,3 +366,9 @@ INSERT INTO datamart_symbolus (symbol, name, name_ko, order_rank, sec_type, stat
  ('TTD','Trade Desk, Inc. Class A','트레이드 데스크',3,' is a general stock symbol and stock ticker.','active'),
  ('SPY','SPDR S&P 500 ETF Trust','SPDR S&P500',1,' means an exchange-traded fund.','active'),
  ('TSLL','Direxion Daily TSLA Bull 2X Shares','테슬라 2X 불',5,' means it is a type of ETFs whose underlying asset is a single stock.','active');
+
+-- ---------------------------------------------------------------------
+-- last_price (종가) 시드 — 이동평균가와 다른 값으로 설정해 우선순위 검증
+-- ---------------------------------------------------------------------
+UPDATE etf_integration SET last_price = ROUND(day_10_moving_avg * 1.02) WHERE symbol IS NOT NULL;
+UPDATE etf_integration SET last_price = NULL WHERE symbol = '364980';   -- 폴백(이동평균) 경로 검증용

@@ -94,21 +94,38 @@ class EvaluationAgent(BaseAgent):
             verdict = "REJECTED"
             summary = "실행 불가 항목이 있습니다. 계좌 조건 또는 목표를 조정하세요."
 
+        # ---- 종합 분석 요약 (항상 생성: 규칙기반 → LLM 있으면 자연문으로 보강) ----
+        recs = opt.get("recommendations", [])
+        rec_lines = ", ".join(
+            f"{r['etf_name']} {r['shares']}주({r['amount']:,.0f}원)" for r in recs
+        ) or "없음"
+        overall_parts = [summary]
+        if recs:
+            overall_parts.append(
+                f"추천 매수: {rec_lines} — 총 {opt.get('spent', 0):,.0f}원, "
+                f"잔여 현금 {opt.get('remaining_cash', 0):,.0f}원."
+            )
+        overall_parts.append(
+            f"목표 대비 비중 괴리(RMSE)는 {before_e}%p 에서 {after_e}%p 로 "
+            f"{'개선' if improved else '변화'}되며, 매수 후 위험자산 비중은 "
+            f"{risk_after * 100:.1f}% 입니다."
+        )
+        if warnings:
+            overall_parts.append(f"주의사항 {len(warnings)}건을 확인하세요.")
+        overall_summary = " ".join(overall_parts)
+
         evaluation: dict[str, Any] = {
             "verdict": verdict,
             "summary": summary,
             "checks": checks,
             "warnings": warnings,
+            "overall_summary": overall_summary,
         }
 
         # LLM 종합 의견 (이 Agent 에 배정된 프로바이더 사용, 실패해도 평가는 유지)
         llm = self.get_llm()
         if llm is not None:
             try:
-                recs = opt.get("recommendations", [])
-                rec_lines = ", ".join(
-                    f"{r['etf_name']} {r['shares']}주({r['amount']:,.0f}원)" for r in recs
-                ) or "없음"
                 check_lines = "; ".join(
                     f"{c['name']}={'통과' if c['passed'] else '실패'}({c['detail']})"
                     for c in checks
@@ -128,6 +145,7 @@ class EvaluationAgent(BaseAgent):
                     max_tokens=500,
                 )
                 evaluation["ai_comment"] = comment.strip()
+                evaluation["overall_summary"] = comment.strip()   # LLM 요약으로 대체
                 evaluation["ai_provider"] = llm.label
                 self.log(context, f"LLM 종합의견 생성 ({llm.label})")
             except Exception as exc:

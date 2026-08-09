@@ -32,10 +32,10 @@ export default function ResultScreen({ data }) {
         </div>
       </section>
 
-      {ev.ai_comment && (
+      {(ev.overall_summary || ev.ai_comment) && (
         <section className="card">
-          <h2>AI 종합 의견 <span className="sub">{ev.ai_provider}</span></h2>
-          <p className="ai-comment">{ev.ai_comment}</p>
+          <h2>종합 분석 요약 {ev.ai_provider && <span className="sub">{ev.ai_provider}</span>}</h2>
+          <p className="ai-comment">{ev.overall_summary || ev.ai_comment}</p>
         </section>
       )}
 

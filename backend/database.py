@@ -234,6 +234,107 @@ def search_etfs(query: str, limit: int = 10) -> list[dict]:
     return out[:limit]
 
 
+def all_theme_titles() -> list[dict]:
+    """전체 테마 목록 (title, search_tag) — 자연어에서 테마 감지용."""
+    return _rows(
+        """
+        SELECT title, MAX(COALESCE(search_tag, '')) AS search_tag
+        FROM datamart_stockcategorykor
+        WHERE deleted_at IS NULL
+        GROUP BY title
+        """
+    )
+
+
+def theme_candidates(theme_query: str, limit: int = 8) -> dict | None:
+    """테마명/키워드로 테마를 찾아 관련 '주식 종목' 후보를 랭킹으로 반환.
+
+    테마 테이블의 심볼에는 테마 ETF 가 많으므로:
+      ① 테마에 직접 등재된 심볼 중 주식(심볼 마스터 sec_type=주식)은 그대로 후보
+      ② 테마 ETF 심볼은 그 ETF 의 상위 구성종목으로 전개해 후보에 합산
+    각 후보에 held_etf_count(편입 ETF 수)를 붙여, 0 인 종목(ETF 로 달성 불가)은
+    호출측에서 제외/대체할 수 있게 한다.
+    """
+    q = theme_query.strip()
+    if not q:
+        return None
+    themes = _rows(
+        """
+        SELECT DISTINCT title FROM datamart_stockcategorykor
+        WHERE deleted_at IS NULL
+          AND (title LIKE CONCAT('%', :q, '%')
+               OR search_tag LIKE CONCAT('%', :q, '%'))
+        LIMIT 3
+        """,
+        q=q,
+    )
+    if not themes:
+        return None
+    titles = [t["title"] for t in themes]
+    tcodes = "(" + ",".join(f"'{t}'" for t in titles) + ")"
+    sym_rows = _rows(
+        f"""
+        SELECT DISTINCT symbol FROM datamart_stockcategorykor
+        WHERE deleted_at IS NULL AND symbol IS NOT NULL AND title IN {tcodes}
+        """
+    )
+    symbols = [r["symbol"] for r in sym_rows]
+    if not symbols:
+        return {"theme": titles[0], "matched_titles": titles, "candidates": []}
+    scodes = "(" + ",".join(f"'{s}'" for s in symbols) + ")"
+
+    candidates: dict[str, dict] = {}
+
+    # ① 직접 등재된 주식 심볼
+    direct = _rows(
+        f"""
+        SELECT symbol, COALESCE(NULLIF(name_ko,''), name) AS name, sec_type
+        FROM datamart_symbolkor
+        WHERE symbol IN {scodes} AND deleted_at IS NULL AND status = 'active'
+        """
+    )
+    for r in direct:
+        if sec_type_label(r["sec_type"]) == "주식":
+            candidates[r["symbol"]] = {
+                "symbol": r["symbol"], "name": r["name"], "score": 50.0,
+            }
+
+    # ② 테마 ETF 의 상위 구성종목으로 전개
+    etf_syms = [
+        r["symbol"] for r in _rows(
+            f"SELECT symbol FROM etf_integration WHERE symbol IN {scodes}"
+        )
+    ]
+    if etf_syms:
+        ecodes = "(" + ",".join(f"'{s}'" for s in etf_syms) + ")"
+        expanded = _rows(
+            f"""
+            SELECT h.asset AS symbol, MAX(h.item_name) AS name,
+                   SUM(h.weight_percentage) AS score
+            FROM datamart_etfholderkor h
+            WHERE h.symbol IN {ecodes} AND h.deleted_at IS NULL
+              AND h.asset IS NOT NULL AND h.asset <> '-1'
+            GROUP BY h.asset
+            ORDER BY score DESC
+            LIMIT {max(limit * 3, 20)}
+            """
+        )
+        for r in expanded:
+            prev = candidates.get(r["symbol"])
+            score = float(r["score"] or 0) + (prev["score"] if prev else 0)
+            candidates[r["symbol"]] = {
+                "symbol": r["symbol"], "name": r["name"] or r["symbol"], "score": score,
+            }
+
+    ranked = sorted(candidates.values(), key=lambda c: -c["score"])[: limit * 2]
+    for c in ranked:
+        c["held_etf_count"] = held_etf_count(c["symbol"])
+        c["score"] = round(c["score"], 2)
+    # 달성 가능(편입 ETF 존재) 종목 우선 정렬
+    ranked.sort(key=lambda c: (c["held_etf_count"] == 0, -c["score"]))
+    return {"theme": titles[0], "matched_titles": titles, "candidates": ranked[:limit]}
+
+
 def held_etf_count(stock_code: str) -> int:
     """이 종목을 편입한 ETF 수 (0 이면 최적화로 목표 달성 불가)."""
     rows = _rows(

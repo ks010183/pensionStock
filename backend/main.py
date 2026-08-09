@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger("uvicorn.error")
 
 from backend import database as db
+from backend import nl_input, summaries
 from backend.agents.orchestrator import run_pipeline
 
 app = FastAPI(title="ETF Portfolio Optimizer", version="1.0.0")
@@ -119,6 +120,39 @@ def search_symbols(q: str, limit: int = 10):
 def search_etfs(q: str, limit: int = 10):
     """연금 매매가능 ETF 유니버스 내 fuzzy 검색 (보유 ETF 자동완성용)."""
     return db.search_etfs(q, limit)
+
+
+class AnalyzeIn(BaseModel):
+    text: str = Field(min_length=1, description="자연어 희망 포트폴리오 설명")
+
+
+@app.post("/api/analyze-input")
+async def analyze_input(body: AnalyzeIn):
+    """자연어 분석 → 자동 추가할 종목(entries) + 테마 후보(theme_suggestions).
+
+    LLM(AGENT_LLM_INPUT/전역)이 있으면 LLM 파싱, 없으면 규칙기반.
+    """
+    return await nl_input.analyze_text(body.text)
+
+
+class SummarizeIn(BaseModel):
+    entries: list[dict] | None = None       # 희망 포트폴리오 [{symbol, name, weight, kind}]
+    holdings: list[HoldingIn] | None = None  # 보유 ETF
+    account_type: str = "pension"
+    cash: float = 0
+
+
+@app.post("/api/summarize")
+async def summarize(body: SummarizeIn):
+    """희망 포트폴리오 / 보유 ETF 분석 요약 생성 (요청된 쪽만)."""
+    out: dict = {}
+    if body.entries is not None:
+        out["portfolio"] = await summaries.portfolio_summary(body.entries)
+    if body.holdings is not None:
+        out["holdings"] = await summaries.holdings_summary(
+            [h.model_dump() for h in body.holdings], body.account_type, body.cash,
+        )
+    return out
 
 
 @app.post("/api/recommend")

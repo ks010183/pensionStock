@@ -196,6 +196,22 @@ html, body {
 .alloc-bar i { display: block; height: 100%; background: var(--accent); border-radius: 6px; transition: width 0.3s ease; }
 .hint.err { color: var(--status-critical); font-weight: 600; }
 
+/* ---------- 테마 후보 박스 / 선택 pill ---------- */
+.theme-box {
+  margin-top: 12px; padding: 12px; border: 1px dashed var(--baseline);
+  border-radius: 12px; background: color-mix(in srgb, var(--series-3) 4%, transparent);
+}
+.theme-head { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; font-size: 13.5px; }
+.pill-btn {
+  cursor: pointer; font-family: inherit; background: var(--page);
+  border: 1px solid var(--border); color: var(--text-secondary);
+}
+.pill-btn.on {
+  border-color: var(--accent); color: var(--accent); font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.pill-btn .ss-sym { margin-left: 4px; }
+
 /* ---------- 검증(verdict) ---------- */
 .verdict { display: flex; align-items: center; gap: 12px; }
 .verdict .icon {

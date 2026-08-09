@@ -17,7 +17,7 @@ DATABASE_URL = (
 # API 키: 설정된 키가 있는 프로바이더만 사용 가능
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCXXllaVmB94nDVToBqermfNc9sqo1AsL4") or os.getenv("GOOGLE_API_KEY", "")
 
 # 전역 기본 프로바이더: auto | anthropic | openai | gemini | none
 #   auto = 키가 설정된 첫 번째 프로바이더 자동 선택 (anthropic → openai → gemini)

@@ -45,7 +45,7 @@ async def _parse_with_llm(llm: LLMClient, text: str) -> list[tuple[str, float]]:
             f"문장: {text}"
         ),
         system=_PARSE_SYSTEM,
-        max_tokens=1024,
+        max_tokens=2000,
     )
     m = re.search(r"\[.*\]", raw, re.S)
     if not m:
@@ -79,9 +79,10 @@ class InputAnalysisAgent(BaseAgent):
                     self.log(context, f"LLM 파싱 성공 ({llm.label}, {len(pairs)}건)")
                 except Exception as exc:  # LLM 실패 시 규칙기반 폴백
                     pairs = []
+                    detail = str(exc).strip()[:200] or exc.__class__.__name__
                     self.log(
                         context,
-                        f"LLM 파싱 실패({llm.label}: {exc.__class__.__name__}) → 규칙기반 폴백",
+                        f"LLM 파싱 실패({llm.label}) → 규칙기반 폴백 (원인: {detail})",
                     )
             if not pairs:
                 pairs = _parse_with_rules(text)

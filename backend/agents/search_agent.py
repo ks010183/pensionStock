@@ -117,7 +117,7 @@ class SearchAgent(BaseAgent):
                         "1~2문장으로 요약하세요 (한국어, 사실 기반, 투자권유 아님).\n"
                         + "\n".join(lines)
                     ),
-                    max_tokens=400,
+                    max_tokens=1200,
                 )
                 context["search_comment"] = {"text": comment.strip(), "provider": llm.label}
                 self.log(context, f"LLM 검색 요약 생성 ({llm.label})")

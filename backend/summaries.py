@@ -25,7 +25,7 @@ async def _polish(agent_key: str, rule_text: str, facts: str) -> tuple[str, str 
                 "과장/추측/투자권유 없이 사실 기반으로.\n\n" + facts
             ),
             system="당신은 연금 포트폴리오 입력 내용을 요약하는 어시스턴트입니다.",
-            max_tokens=500,
+            max_tokens=1500,
         )
         return out.strip(), llm.label
     except Exception:

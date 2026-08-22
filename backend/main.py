@@ -122,6 +122,26 @@ def search_etfs(q: str, limit: int = 10):
     return db.search_etfs(q, limit)
 
 
+@app.get("/api/stocks/alternatives")
+def stock_alternatives(symbol: str, name: str = ""):
+    """종목의 ETF 편입 정보 + infostock_theme 기반 같은 테마 대체/보완 종목.
+
+    - held_etf_count = 0        : 어떤 ETF 에도 미편입 → 대체 종목으로 '교체' 필요
+    - max_etf_weight < 목표비중 : 편입비중이 작아 목표 달성 불가 → 대체 종목으로 '분할 보완'
+      (판단은 프론트가 목표 비중과 비교해 수행; 퇴직연금은 0.7×max 가 실질 상한)
+    대체 종목은 같은 테마이면서 편입 ETF 가 있는 종목만 반환.
+    """
+    held = db.held_etf_count(symbol)
+    max_w = db.max_etf_weight(symbol) if held > 0 else 0.0
+    alternatives = db.infostock_alternatives(symbol, name)
+    return {
+        "symbol": symbol,
+        "held_etf_count": held,
+        "max_etf_weight": max_w,
+        "alternatives": alternatives,
+    }
+
+
 class AnalyzeIn(BaseModel):
     text: str = Field(min_length=1, description="자연어 희망 포트폴리오 설명")
 

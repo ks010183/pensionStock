@@ -152,10 +152,39 @@ class InputAnalysisAgent(BaseAgent):
             else:
                 target[sym] = target.get(sym, 0) + weight
                 if db.held_etf_count(sym) == 0:
-                    warnings.append(
-                        f"'{name}' 을 편입한 ETF가 없어 목표 달성이 어렵습니다. "
-                        "유사 종목/테마 ETF를 참고하세요."
-                    )
+                    # infostock_theme 기반 같은 테마 대체 종목 추천
+                    alts = db.infostock_alternatives(sym, name)
+                    if alts:
+                        warnings.append(
+                            f"'{name}' 을 편입한 ETF가 없어 목표 달성이 어렵습니다. "
+                            f"같은 테마 대체 후보: "
+                            + ", ".join(f"{a['name']}({a['themes']})" for a in alts[:4])
+                        )
+                        context.setdefault("target_alternatives", {})[sym] = {
+                            "name": name, "alternatives": alts,
+                        }
+                    else:
+                        warnings.append(
+                            f"'{name}' 을 편입한 ETF가 없어 목표 달성이 어렵습니다. "
+                            "유사 종목/테마 ETF를 참고하세요."
+                        )
+                else:
+                    # 편입은 되어 있으나 최대 편입비중이 목표보다 작은 경우 → 분할 보완 안내
+                    max_w = db.max_etf_weight(sym)
+                    if 0 < max_w < weight:
+                        alts = db.infostock_alternatives(sym, name)
+                        msg = (
+                            f"'{name}' 목표 {weight}% 는 ETF 내 최대 편입비중({max_w}%)을 "
+                            f"초과해 단독으로는 달성할 수 없습니다."
+                        )
+                        if alts:
+                            msg += (" 같은 테마 보완 후보: "
+                                    + ", ".join(f"{a['name']}({a['themes']})" for a in alts[:4]))
+                            context.setdefault("target_alternatives", {})[sym] = {
+                                "name": name, "alternatives": alts,
+                                "max_etf_weight": max_w, "reason": "insufficient",
+                            }
+                        warnings.append(msg)
             resolved.append({
                 "stock_code": sym,
                 "stock_name": name,

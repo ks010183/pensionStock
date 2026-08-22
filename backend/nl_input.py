@@ -171,9 +171,16 @@ async def analyze_text(text: str) -> dict[str, Any]:
             "market": hit["market"],
         })
         if not hit["is_etf_like"] and db.held_etf_count(hit["symbol"]) == 0:
-            warnings.append(
-                f"'{hit['name']}' 은 편입한 ETF가 없어 목표 달성이 어렵습니다."
-            )
+            alts = db.infostock_alternatives(hit["symbol"], hit["name"])
+            if alts:
+                warnings.append(
+                    f"'{hit['name']}' 은 편입한 ETF가 없어 목표 달성이 어렵습니다 — "
+                    f"같은 테마 대체 후보: {', '.join(a['name'] for a in alts[:4])}"
+                )
+            else:
+                warnings.append(
+                    f"'{hit['name']}' 은 편입한 ETF가 없어 목표 달성이 어렵습니다."
+                )
 
     # ② 테마 → 관련 주식 후보 (달성 가능 종목 우선, 불가 종목은 뒤로/표시)
     theme_suggestions: list[dict] = []

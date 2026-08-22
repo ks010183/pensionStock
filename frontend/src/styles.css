@@ -211,6 +211,10 @@ html, body {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 .pill-btn .ss-sym { margin-left: 4px; }
+.alt-box {
+  border-color: var(--status-warning);
+  background: color-mix(in srgb, var(--status-warning) 6%, transparent);
+}
 
 /* ---------- 검증(verdict) ---------- */
 .verdict { display: flex; align-items: center; gap: 12px; }

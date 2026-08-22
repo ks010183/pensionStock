@@ -34,6 +34,8 @@ export default function App() {
     }
   }
 
+  const showInput = !loading && tab === 'input'
+
   return (
     <div className="phone">
       <header className="app-header">
@@ -54,9 +56,11 @@ export default function App() {
           </div>
         )}
 
-        {!loading && tab === 'input' && (
+        {/* 입력 화면은 항상 마운트 유지 → 추천 후에도 입력 내용이 보존됨 */}
+        <div style={{ display: showInput ? 'contents' : 'none' }}>
           <InputScreen onSubmit={submit} />
-        )}
+        </div>
+
         {!loading && tab === 'result' && (
           result ? <ResultScreen data={result} /> :
           <div className="empty">먼저 입력 탭에서 희망 포트폴리오와<br />계좌 정보를 입력해 주세요.</div>

@@ -335,6 +335,72 @@ def theme_candidates(theme_query: str, limit: int = 8) -> dict | None:
     return {"theme": titles[0], "matched_titles": titles, "candidates": ranked[:limit]}
 
 
+def _norm_itemcd(code: str | None) -> str:
+    """infostock 종목코드 정규화 — 'A005930' 형태의 접두사 제거."""
+    c = (code or "").strip()
+    if len(c) == 7 and c[0].upper() == "A" and c[1:].isdigit():
+        return c[1:]
+    return c
+
+
+def infostock_alternatives(stock_code: str, stock_name: str | None = None,
+                           limit: int = 6) -> list[dict]:
+    """infostock_theme(주식-테마 매핑)으로 같은 테마의 대체 종목을 추천.
+
+    입력 종목이 어떤 ETF 에도 편입되지 않아 목표 달성이 불가능할 때 사용:
+      ① 해당 종목이 속한 테마(tmcode)들을 찾고
+      ② 같은 테마의 다른 종목들을 공유 테마 수로 랭킹한 뒤
+      ③ ETF 편입 수(held_etf_count) > 0 인, 즉 ETF 로 달성 가능한 종목만 반환
+    """
+    name = (stock_name or "").strip()
+    themes = _rows(
+        """
+        SELECT DISTINCT tmcode, tmname FROM infostock_theme
+        WHERE itemcd IN (:code, CONCAT('A', :code))
+           OR (:name <> '' AND itemname = :name)
+        """,
+        code=stock_code, name=name,
+    )
+    if not themes:
+        return []
+    tcodes = "(" + ",".join(f"'{t['tmcode']}'" for t in themes) + ")"
+    rows = _rows(
+        f"""
+        SELECT t.itemcd, MAX(t.itemname) AS itemname,
+               COUNT(DISTINCT t.tmcode) AS shared_themes,
+               SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT t.tmname SEPARATOR ', '), ', ', 3) AS themes
+        FROM infostock_theme t
+        WHERE t.tmcode IN {tcodes}
+          AND t.itemcd NOT IN (:code, CONCAT('A', :code))
+          AND (:name = '' OR t.itemname <> :name)
+        GROUP BY t.itemcd
+        ORDER BY shared_themes DESC
+        LIMIT {max(limit * 4, 24)}
+        """,
+        code=stock_code, name=name,
+    )
+    out: list[dict] = []
+    seen: set[str] = set()
+    for r in rows:
+        sym = _norm_itemcd(r["itemcd"])
+        if not sym or sym in seen:
+            continue
+        seen.add(sym)
+        held = held_etf_count(sym)
+        if held == 0:
+            continue                      # 대체 종목도 달성 가능해야 함
+        out.append({
+            "symbol": sym,
+            "name": r["itemname"] or sym,
+            "shared_themes": int(r["shared_themes"]),
+            "themes": r["themes"],
+            "held_etf_count": held,
+        })
+        if len(out) >= limit:
+            break
+    return out
+
+
 def held_etf_count(stock_code: str) -> int:
     """이 종목을 편입한 ETF 수 (0 이면 최적화로 목표 달성 불가)."""
     rows = _rows(
@@ -343,6 +409,26 @@ def held_etf_count(stock_code: str) -> int:
         s=stock_code,
     )
     return int(rows[0]["c"]) if rows else 0
+
+
+def max_etf_weight(stock_code: str) -> float:
+    """연금 매매가능 ETF 유니버스 내에서 이 종목의 최대 편입비중(%).
+
+    계좌 전체를 그 ETF 하나에 넣어도 종목 노출은 이 값을 넘을 수 없으므로,
+    목표 비중이 이 값보다 크면 구조적으로 달성 불가 → 같은 테마 종목으로
+    분할 보완이 필요하다. (퇴직연금이면 실제 상한은 0.7 × 이 값)
+    """
+    rows = _rows(
+        f"""
+        SELECT MAX(h.weight_percentage) AS w
+        FROM datamart_etfholderkor h
+        JOIN etf_integration e ON e.symbol = h.symbol
+        WHERE h.asset = :code AND h.deleted_at IS NULL
+          AND {_UNIVERSE_WHERE}
+        """,
+        code=stock_code,
+    )
+    return round(float(rows[0]["w"] or 0), 2) if rows else 0.0
 
 
 # ---------------------------------------------------------------------------

@@ -147,6 +147,26 @@ ETF 1개 → 섹터 N행. ENGINE=InnoDB, CHARSET=utf8mb4_unicode_ci.
 
 ---
 
+## 5. `infostock_theme` — 주식-테마 매핑 (2026-08 추가)
+
+주식 종목과 테마 간의 매핑 테이블. **ETF 미편입 종목의 대체 종목 추천**에 사용.
+
+| 컬럼 | 설명 |
+|---|---|
+| `tmcode` | 테마 코드 |
+| `tmname` | 테마명 |
+| `tmdetail` | 테마 설명 |
+| `itemcd` | 종목 코드 (`A005930` 형태 접두사 가능 — 백엔드에서 정규화) |
+| `itemname` | 종목명 |
+| `itemdetail` | 종목 설명 |
+
+사용 흐름: 입력 종목의 `held_etf_count`(편입 ETF 수)가 0 이면 →
+이 테이블에서 같은 테마(tmcode)의 다른 종목을 공유 테마 수로 랭킹 →
+그중 편입 ETF 가 있는(달성 가능한) 종목만 대체 후보로 반환
+(`database.infostock_alternatives`, `GET /api/stocks/alternatives`).
+
+---
+
 ## 프로젝트(pensionStock) 매핑 가이드
 
 현재 백엔드의 데모 스키마 → 실제 테이블 대응:

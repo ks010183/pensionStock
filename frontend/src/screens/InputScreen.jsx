@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import SymbolSearch from '../components/SymbolSearch.jsx'
 
 const KRW = n => Number(n).toLocaleString('ko-KR')
@@ -17,6 +17,70 @@ export default function InputScreen({ onSubmit }) {
 
   const used = useMemo(() => entries.reduce((s, e) => s + e.weight, 0), [entries])
   const remaining = Math.max(0, Math.round((100 - used) * 100) / 100)
+
+  // ---- ETF 미편입/편입비중 부족 감지 → infostock_theme 대체·보완 종목 ----
+  const [stockInfo, setStockInfo] = useState({})   // {symbol: {held, maxW, alternatives}}
+  const infoFetching = useRef(new Set())
+
+  useEffect(() => {
+    for (const e of entries) {
+      if (e.kind !== 'stock' || stockInfo[e.symbol] || infoFetching.current.has(e.symbol)) continue
+      infoFetching.current.add(e.symbol)
+      fetch(`/api/stocks/alternatives?symbol=${encodeURIComponent(e.symbol)}&name=${encodeURIComponent(e.name)}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (d) setStockInfo(m => ({
+            ...m,
+            [e.symbol]: { held: d.held_etf_count, maxW: d.max_etf_weight, alternatives: d.alternatives || [] },
+          }))
+        })
+        .catch(() => {})
+        .finally(() => infoFetching.current.delete(e.symbol))
+    }
+  }, [entries, stockInfo])
+
+  /** 경고 목록 (목표 비중과 편입 정보를 비교해 실시간 도출)
+   *  - not_held    : 어떤 ETF 에도 미편입 → 클릭 시 통째로 교체
+   *  - insufficient: 최대 편입비중 < 목표 비중 → 클릭 시 달성 가능분만 남기고 분할 보완 */
+  const stockWarnings = useMemo(() => entries
+    .filter(e => e.kind === 'stock' && stockInfo[e.symbol])
+    .map(e => {
+      const info = stockInfo[e.symbol]
+      if (info.held === 0) return { type: 'not_held', entry: e, info }
+      if (info.maxW > 0 && e.weight > info.maxW) return { type: 'insufficient', entry: e, info }
+      return null
+    })
+    .filter(Boolean), [entries, stockInfo])
+
+  /** 미편입 종목을 같은 테마 대체 종목으로 통째로 교체 (비중 유지) */
+  const replaceWithAlternative = (fromSymbol, alt) => {
+    setEntries(list => list.map(e => e.symbol === fromSymbol
+      ? { ...e, symbol: alt.symbol, name: alt.name, sec_label: '주식', market: 'KR', kind: 'stock' }
+      : e))
+    setPortfolioSummary(null)
+  }
+
+  /** 편입비중 부족 종목: 달성 가능분만 남기고 부족분을 보완 종목에 배분 */
+  const splitWithAlternative = (fromSymbol, alt, maxW) => {
+    setEntries(list => {
+      const from = list.find(e => e.symbol === fromSymbol)
+      if (!from) return list
+      const keep = Math.floor(Math.min(from.weight, maxW) * 10) / 10
+      const rem = Math.round((from.weight - keep) * 10) / 10
+      if (rem <= 0) return list
+      const others = list.filter(e => e.symbol !== fromSymbol && e.symbol !== alt.symbol)
+      const prevAlt = list.find(e => e.symbol === alt.symbol)
+      return [
+        ...others,
+        { ...from, weight: keep },
+        {
+          symbol: alt.symbol, name: alt.name, sec_label: '주식', market: 'KR',
+          kind: 'stock', weight: Math.round(((prevAlt ? prevAlt.weight : 0) + rem) * 10) / 10,
+        },
+      ]
+    })
+    setPortfolioSummary(null)
+  }
 
   /** 검증 후 항목 추가 (자동 추가 경로도 공용). 성공 시 실제 추가된 비중을 반환 */
   const pushEntry = (item, weight, { clamp = false } = {}) => {
@@ -294,6 +358,43 @@ export default function InputScreen({ onSubmit }) {
               <span className="amt">{e.weight}%</span>
               <button className="x-btn" aria-label="삭제"
                 onClick={() => { setEntries(list => list.filter(x => x.symbol !== e.symbol)); setPortfolioSummary(null) }}>✕</button>
+            </div>
+          </div>
+        ))}
+
+        {/* ETF 미편입/편입비중 부족 경고 + infostock_theme 대체·보완 종목 */}
+        {stockWarnings.map(({ type, entry, info }) => (
+          <div className="theme-box alt-box" key={type + entry.symbol}>
+            <div className="theme-head">
+              {type === 'not_held' ? (
+                <>
+                  <b>⚠ '{entry.name}' 은 어떤 ETF에도 편입되어 있지 않습니다</b>
+                  <span className="hint" style={{ margin: 0 }}>
+                    {info.alternatives.length > 0
+                      ? '같은 테마의 대체 종목을 누르면 같은 비중으로 교체됩니다'
+                      : '대체 종목을 찾지 못했습니다. 이 종목은 최적화에서 달성되지 않습니다.'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <b>⚠ '{entry.name}' 목표 {entry.weight}%는 ETF 최대 편입비중({info.maxW}%)을 초과합니다</b>
+                  <span className="hint" style={{ margin: 0 }}>
+                    {info.alternatives.length > 0
+                      ? `보완 종목을 누르면 ${entry.name} ${Math.floor(Math.min(entry.weight, info.maxW) * 10) / 10}% + 보완 종목 ${Math.round((entry.weight - Math.floor(Math.min(entry.weight, info.maxW) * 10) / 10) * 10) / 10}% 로 분할됩니다`
+                      : '같은 테마 보완 종목을 찾지 못했습니다. 비중을 낮추는 것을 권장합니다.'}
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="pill-wrap">
+              {info.alternatives.map(a => (
+                <button key={a.symbol} className="pill pill-btn"
+                  onClick={() => type === 'not_held'
+                    ? replaceWithAlternative(entry.symbol, a)
+                    : splitWithAlternative(entry.symbol, a, info.maxW)}>
+                  {a.name} <span className="ss-sym">{a.themes} · 편입ETF {a.held_etf_count}</span>
+                </button>
+              ))}
             </div>
           </div>
         ))}

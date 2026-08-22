@@ -372,3 +372,48 @@ INSERT INTO datamart_symbolus (symbol, name, name_ko, order_rank, sec_type, stat
 -- ---------------------------------------------------------------------
 UPDATE etf_integration SET last_price = ROUND(day_10_moving_avg * 1.02) WHERE symbol IS NOT NULL;
 UPDATE etf_integration SET last_price = NULL WHERE symbol = '364980';   -- 폴백(이동평균) 경로 검증용
+
+-- ---------------------------------------------------------------------
+-- infostock_theme (주식-테마 매핑) — 대체 종목 추천용
+-- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS infostock_theme;
+CREATE TABLE infostock_theme (
+  tmcode     varchar(20)  NOT NULL,
+  tmname     varchar(100) NOT NULL,
+  tmdetail   varchar(1000) DEFAULT NULL,
+  itemcd     varchar(20)  NOT NULL,
+  itemname   varchar(100) NOT NULL,
+  itemdetail varchar(1000) DEFAULT NULL,
+  KEY idx_it_item (itemcd),
+  KEY idx_it_name (itemname),
+  KEY idx_it_tm (tmcode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO infostock_theme (tmcode, tmname, tmdetail, itemcd, itemname, itemdetail) VALUES
+ -- 로봇 테마: 레인보우로보틱스는 ETF 미편입(달성불가) → 삼성전자/현대차가 대체 후보
+ ('T001','로봇','산업/휴머노이드 로봇','A277810','레인보우로보틱스','협동로봇/휴머노이드'),
+ ('T001','로봇','산업/휴머노이드 로봇','A005930','삼성전자','로봇 사업 투자'),
+ ('T001','로봇','산업/휴머노이드 로봇','A005380','현대차','보스턴다이내믹스 보유'),
+ -- 반도체 테마
+ ('T002','반도체','메모리/파운드리','A005930','삼성전자','메모리 1위'),
+ ('T002','반도체','메모리/파운드리','A000660','SK하이닉스','HBM 강자'),
+ -- AI 테마: 레인보우로보틱스 중복 테마
+ ('T003','인공지능(AI)','AI 밸류체인','A277810','레인보우로보틱스','AI 로봇'),
+ ('T003','인공지능(AI)','AI 밸류체인','A035420','NAVER','하이퍼클로바'),
+ ('T003','인공지능(AI)','AI 밸류체인','A000660','SK하이닉스','AI 메모리'),
+ -- 우주항공 테마: 쎄트렉아이도 ETF 미편입 → 한화에어로/한국항공우주가 대체
+ ('T004','우주항공','위성/발사체','A099320','쎄트렉아이','위성 시스템'),
+ ('T004','우주항공','위성/발사체','A012450','한화에어로스페이스','발사체/엔진'),
+ ('T004','우주항공','위성/발사체','A047810','한국항공우주','항공기/위성');
+
+-- 심볼 마스터에 ETF 미편입 종목 추가 (검색/추가 가능해야 함)
+INSERT INTO datamart_symbolkor (symbol, name, name_ko, order_rank, sec_type, status) VALUES
+ ('277810','레인보우로보틱스','레인보우로보틱스',25,' is a general stock symbol and stock ticker.','active'),
+ ('099320','쎄트렉아이','쎄트렉아이',40,' is a general stock symbol and stock ticker.','active');
+
+-- 방산 테마 (편입비중 부족 분할 보완 케이스: 한화 max 9.8%)
+INSERT INTO infostock_theme (tmcode, tmname, tmdetail, itemcd, itemname, itemdetail) VALUES
+ ('T005','방위산업','K-방산 밸류체인','A000880','한화','방산 지주'),
+ ('T005','방위산업','K-방산 밸류체인','A012450','한화에어로스페이스','발사체/엔진'),
+ ('T005','방위산업','K-방산 밸류체인','A079550','LIG넥스원','유도무기'),
+ ('T005','방위산업','K-방산 밸류체인','A047810','한국항공우주','항공기');

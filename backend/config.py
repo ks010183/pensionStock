@@ -23,7 +23,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCXXllaVmB94nDVToBqermfNc9sqo
 #   auto = 키가 설정된 첫 번째 프로바이더 자동 선택 (anthropic → openai → gemini)
 #   none = LLM 미사용 (모든 Agent 규칙기반)
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "auto").lower()
-LLM_MODEL = os.getenv("LLM_MODEL", "")          # 전역 모델 오버라이드 (선택)
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.5-flash")          # 전역 모델 오버라이드 (선택)
 
 # Agent 별 프로바이더/모델 오버라이드. 형식: "provider" 또는 "provider:model"
 #   예) AGENT_LLM_INPUT=openai:gpt-5.4-mini  AGENT_LLM_EVALUATION=gemini

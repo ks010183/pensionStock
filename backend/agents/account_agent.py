@@ -85,7 +85,7 @@ class AccountAnalysisAgent(BaseAgent):
                         f"위험자산 {risk_value / total_value * 100:.1f}%, "
                         f"룩스루 상위 노출: {top}"
                     ),
-                    max_tokens=300,
+                    max_tokens=1200,
                 )
                 context["account_analysis"]["ai_comment"] = comment.strip()
                 context["account_analysis"]["ai_provider"] = llm.label

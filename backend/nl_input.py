@@ -135,11 +135,12 @@ async def analyze_text(text: str) -> dict[str, Any]:
     if llm is not None:
         try:
             raw = await llm.complete(_PARSE_PROMPT % text, system=_PARSE_SYSTEM,
-                                     max_tokens=1024)
+                                     max_tokens=2000)
             parsed = _parse_with_llm_sync_result(raw)
             provider = llm.label
         except Exception as exc:
-            warnings.append(f"LLM 분석 실패({exc.__class__.__name__}) → 규칙기반으로 분석했습니다.")
+            detail = str(exc).strip()[:200] or exc.__class__.__name__
+            warnings.append(f"LLM 분석 실패 → 규칙기반으로 분석했습니다. (원인: {detail})")
     if parsed is None:
         parsed = _parse_with_rules(text)
         if provider is None and llm is None:

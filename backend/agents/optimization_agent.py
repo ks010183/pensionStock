@@ -132,7 +132,7 @@ class OptimizationAgent(BaseAgent):
                         f"트래킹에러 {result.before_error}%p → {result.after_error}%p, "
                         f"매수 후 위험자산 {result.risk_ratio_after * 100:.1f}%"
                     ),
-                    max_tokens=400,
+                    max_tokens=1200,
                 )
                 context["optimization"]["ai_comment"] = comment.strip()
                 context["optimization"]["ai_provider"] = llm.label

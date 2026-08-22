@@ -142,7 +142,7 @@ class EvaluationAgent(BaseAgent):
                         f"경고: {'; '.join(warnings) or '없음'}"
                     ),
                     system="당신은 연금 포트폴리오 리밸런싱 결과를 고객에게 설명하는 어시스턴트입니다.",
-                    max_tokens=500,
+                    max_tokens=1500,
                 )
                 evaluation["ai_comment"] = comment.strip()
                 evaluation["overall_summary"] = comment.strip()   # LLM 요약으로 대체

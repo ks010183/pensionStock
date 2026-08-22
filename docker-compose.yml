@@ -25,10 +25,10 @@ services:
       # ---- LLM 설정 (선택) — 키가 하나도 없으면 전체 규칙기반으로 동작 ----
       # ANTHROPIC_API_KEY: sk-ant-...
       # OPENAI_API_KEY: sk-...
-      # GEMINI_API_KEY: AIza...
+      GEMINI_API_KEY: AIzaSyAK4CtAOSKeG2-WdNeImOe1_-3CbY0n81I
       # LLM_PROVIDER: auto              # auto | anthropic | openai | gemini | none
       # AGENT_LLM_INPUT: openai:gpt-5.4-mini
-      # AGENT_LLM_EVALUATION: gemini:gemini-3.6-flash
+      AGENT_LLM_EVALUATION: gemini:gemini-3.5-flash
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux 호환 (macOS/Windows 는 기본 제공)
     ports:

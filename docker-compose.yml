@@ -4,7 +4,11 @@
 #       backend 컨테이너는 host.docker.internal:3306 으로 접속한다.
 #
 # 실행:  docker compose up -d --build
-# 접속:  http://localhost:8080  (웹/모바일 시뮬레이션)
+# 접속:  http://localhost:8888  (웹/모바일 시뮬레이션)
+#
+# ⚠ API 키 등 비밀값은 이 파일에 직접 쓰지 않는다 (저장소에 커밋되면 유출됨).
+#    프로젝트 루트에 .env 파일을 만들면 compose 가 자동으로 읽어 ${VAR} 를 치환한다.
+#    (.env 는 gitignore 되어 있음 — 템플릿은 .env.example 참조)
 services:
   backend:
     build:
@@ -20,15 +24,18 @@ services:
       # ---- 유니버스/분류 규칙 (선택, 기본값은 backend/config.py 참조) ----
       # UNIVERSE_REQUIRE_PENSION: "1"     # pension 값이 있는 상품만 (0 이면 전체)
       # SAFE_FUND_TYPES: "채권형,단기금융,금리형,채권혼합형,혼합채권형"
-      # SAFE_NAME_KEYWORDS: "채권,국고채,금리,KOFR,..."
       # MAX_SAFE_CANDIDATES: "10"
-      # ---- LLM 설정 (선택) — 키가 하나도 없으면 전체 규칙기반으로 동작 ----
-      # ANTHROPIC_API_KEY: sk-ant-...
-      # OPENAI_API_KEY: sk-...
-      GEMINI_API_KEY: AIzaSyAK4CtAOSKeG2-WdNeImOe1_-3CbY0n81I
-      # LLM_PROVIDER: auto              # auto | anthropic | openai | gemini | none
-      # AGENT_LLM_INPUT: openai:gpt-5.4-mini
-      AGENT_LLM_EVALUATION: gemini:gemini-3.5-flash
+      # ---- LLM 설정 — 키 값은 .env 에서 주입 (여기에 직접 쓰지 말 것!) ----
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+      LLM_MODEL: ${LLM_MODEL:-}
+      AGENT_LLM_INPUT: ${AGENT_LLM_INPUT:-}
+      AGENT_LLM_ACCOUNT: ${AGENT_LLM_ACCOUNT:-}
+      AGENT_LLM_SEARCH: ${AGENT_LLM_SEARCH:-}
+      AGENT_LLM_OPTIMIZATION: ${AGENT_LLM_OPTIMIZATION:-}
+      AGENT_LLM_EVALUATION: ${AGENT_LLM_EVALUATION:-gemini:gemini-3.5-flash}
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux 호환 (macOS/Windows 는 기본 제공)
     ports:

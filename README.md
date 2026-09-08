@@ -209,3 +209,33 @@ pensionStock/
     ├── Dockerfile           # node 빌드 → nginx 서빙 (멀티 스테이지)
     └── nginx.conf           # SPA 라우팅 + /api 프록시
 ```
+
+## API 키 관리 및 Railway 배포
+
+**비밀값(API 키)은 코드/compose 파일에 절대 쓰지 않습니다** — 저장소에 커밋되는 순간 유출됩니다.
+
+### 로컬 PC
+
+```bash
+cp .env.example .env     # 템플릿 복사
+# .env 를 열어 실제 키 입력 (.env 는 gitignore 되어 커밋되지 않음)
+docker compose up -d --build
+```
+
+- `docker compose` 는 프로젝트 루트의 `.env` 를 자동으로 읽어 `${VAR}` 를 치환합니다.
+- `uvicorn` 직접 실행 시에도 `backend/config.py` 의 `load_dotenv()` 가 `.env` 를 읽습니다.
+
+### Railway
+
+Railway 대시보드 → 해당 서비스 → **Variables** 탭에 `.env.example` 과 같은 이름으로 등록합니다
+(`GEMINI_API_KEY`, `LLM_PROVIDER`, `ETF_DB_*` 등). Railway 가 런타임 환경변수로 주입하므로
+코드 수정 없이 동일하게 동작하며, `.env` 파일은 필요 없습니다.
+Dockerfile 이 `PORT` 환경변수를 지원하므로 Railway 의 포트 할당도 자동 적용됩니다.
+
+### 키가 유출된 경우
+
+1. **즉시 해당 키를 폐기(revoke)하고 새 키 발급** — Gemini: Google AI Studio → API Keys.
+   git 히스토리에서 지워도 이미 노출된 키는 유효하므로 폐기가 유일한 해결책입니다.
+2. 새 키는 `.env`(로컬) / Railway Variables 에만 넣습니다.
+3. GitHub 저장소 Settings → Code security 에서 **Secret scanning / Push protection** 을 켜면
+   키가 포함된 커밋의 push 자체가 차단됩니다.

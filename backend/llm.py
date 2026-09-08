@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import os
+
 import httpx
 
 from backend import config
@@ -28,7 +30,11 @@ DEFAULT_MODELS = {
     "gemini": "gemini-3.6-flash",
 }
 
-_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
+# LLM 호출 타임아웃 (초).
+# Vercel 등 프록시 뒤에서 서빙할 때는 프록시 타임아웃(약 30초)보다 짧아야
+# "느린 LLM → 프록시 502" 대신 규칙기반 폴백으로 제시간에 응답할 수 있다.
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "25"))
+_TIMEOUT = httpx.Timeout(LLM_TIMEOUT_SECONDS, connect=10.0)
 
 
 class LLMError(Exception):

@@ -239,3 +239,43 @@ Dockerfile 이 `PORT` 환경변수를 지원하므로 Railway 의 포트 할당�
 2. 새 키는 `.env`(로컬) / Railway Variables 에만 넣습니다.
 3. GitHub 저장소 Settings → Code security 에서 **Secret scanning / Push protection** 을 켜면
    키가 포함된 커밋의 push 자체가 차단됩니다.
+
+### Railway(백엔드) + Vercel(프론트) 배포 체크리스트
+
+502 = "백엔드 앱이 응답하지 못함". 아래 순서로 확인합니다.
+
+**1) 백엔드 단독 확인** — 브라우저에서 직접 접속:
+
+```
+https://<railway-도메인>/api/health      → {"status":"ok"} 나와야 함
+https://<railway-도메인>/api/health/db   → DB 연결 확인
+```
+
+- `/api/health` 부터 502 라면 백엔드 자체 문제:
+  - **PORT**: Railway 는 PORT 환경변수로 포트를 지정합니다. backend/Dockerfile 이
+    `${PORT:-8000}` 을 지원하도록 수정되어 있으니(2026-08), 이 수정 **이전에 배포한
+    이미지라면 재배포**가 필요합니다. Railway Deploy Logs 에서
+    `Uvicorn running on http://0.0.0.0:<PORT>` 의 포트가 Railway 가 할당한 값인지 확인.
+  - Deploy Logs 에 파이썬 트레이스백이 있으면 그 내용이 원인입니다.
+- `/api/health` 는 되는데 `/api/health/db` 나 분석 API 만 실패하면 **DB 문제**:
+  - Railway 컨테이너는 내 PC 의 MySQL(host.docker.internal)에 접속할 수 없습니다.
+    클라우드 DB(Railway MySQL 서비스 등)에 etf_db 를 올리고, Railway Variables 에
+    `ETF_DB_HOST/PORT/USER/PASSWORD/NAME` 을 그 DB 정보로 설정해야 합니다.
+    (로컬 DB 덤프: `docker exec <mysql컨테이너> mysqldump -uroot -pmysql etf_db > etf_db.sql`)
+  - DB 접속이 오래 걸려 타임아웃되면 게이트웨이가 502 로 바꿔 보여줄 수 있습니다.
+
+**2) 프론트(Vercel) → 백엔드 연결** — 프론트는 상대경로 `/api/...` 를 호출하므로
+Vercel 이 이를 Railway 로 프록시해야 합니다. `frontend/vercel.json` 의
+`destination` 을 실제 Railway 도메인으로 바꾼 뒤 재배포하세요:
+
+```json
+{ "rewrites": [ { "source": "/api/:path*",
+    "destination": "https://<railway-도메인>/api/:path*" } ] }
+```
+
+- Vercel 프로젝트의 Root Directory 는 `frontend`, Build Command `npm run build`,
+  Output `dist` 이어야 하며, vercel.json 은 그 루트(frontend/)에 있어야 적용됩니다.
+- 리라이트 방식은 same-origin 이라 CORS 설정이 필요 없습니다.
+
+**3) LLM 키** — Railway Variables 에 `GEMINI_API_KEY` 등도 등록해야
+배포 환경에서 AI 분석이 LLM 을 사용합니다 (없으면 규칙기반으로 동작).

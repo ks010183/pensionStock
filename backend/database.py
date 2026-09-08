@@ -25,7 +25,10 @@ except ImportError:  # pragma: no cover
     import config  # type: ignore
     from config import DATABASE_URL  # type: ignore
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=3600)
+# connect_timeout: DB 호스트가 접속 불가일 때 오래 매달리다 게이트웨이 502 로 보이는 것을
+# 방지 — 5초 안에 실패시키고 명확한 오류(500 + 원인)로 응답한다
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=3600,
+                       connect_args={"connect_timeout": 5})
 
 # 연금 매매가능 ETF 유니버스 공통 WHERE (etf_integration alias: e)
 _UNIVERSE_WHERE = """

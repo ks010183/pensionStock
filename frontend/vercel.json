@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://pensionstock-production.up.railway.app/api/:path*"
+      "destination": "https://YOUR-RAILWAY-APP.up.railway.app/api/:path*"
     }
   ]
 }

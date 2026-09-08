@@ -9,3 +9,4 @@ scipy==1.17.1
 mcp==1.27.0
 anyio==4.13.0
 httpx==0.28.1           # 멀티 프로바이더 LLM REST 호출 (anthropic/openai/gemini)
+python-dotenv==1.2.2   # 로컬 .env 로드 (Railway 등 배포환경에선 미사용)

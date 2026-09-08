@@ -1,5 +1,17 @@
-"""공통 설정."""
+"""공통 설정.
+
+API 키 등 비밀값은 코드/저장소에 절대 넣지 않는다.
+  - 로컬 PC : 프로젝트 루트의 .env 파일 (gitignore 됨) → 아래 load_dotenv 가 로드
+  - Railway : 대시보드 Service → Variables 에 등록 → 런타임 환경변수로 주입됨
+둘 다 최종적으로는 os.getenv 로 읽으므로 코드 분기가 필요 없다.
+"""
 import os
+
+try:  # 로컬 실행용 .env 로드 (파일이 없거나 미설치면 조용히 건너뜀 — Railway 는 불필요)
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:  # pragma: no cover
+    pass
 
 DB_HOST = os.getenv("ETF_DB_HOST", "127.0.0.1")
 DB_PORT = int(os.getenv("ETF_DB_PORT", "3306"))
@@ -17,7 +29,7 @@ DATABASE_URL = (
 # API 키: 설정된 키가 있는 프로바이더만 사용 가능
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCXXllaVmB94nDVToBqermfNc9sqo1AsL4") or os.getenv("GOOGLE_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
 
 # 전역 기본 프로바이더: auto | anthropic | openai | gemini | none
 #   auto = 키가 설정된 첫 번째 프로바이더 자동 선택 (anthropic → openai → gemini)

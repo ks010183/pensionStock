@@ -20,7 +20,7 @@ services:
       ETF_DB_PORT: "3306"
       ETF_DB_USER: root
       ETF_DB_PASSWORD: mysql
-      ETF_DB_NAME: etf_db_260909
+      ETF_DB_NAME: etf_db
       # ---- 유니버스/분류 규칙 (선택, 기본값은 backend/config.py 참조) ----
       # UNIVERSE_REQUIRE_PENSION: "1"     # pension 값이 있는 상품만 (0 이면 전체)
       # SAFE_FUND_TYPES: "채권형,단기금융,금리형,채권혼합형,혼합채권형"

@@ -1,0 +1,82 @@
+"""공통 설정.
+
+API 키 등 비밀값은 코드/저장소에 절대 넣지 않는다.
+  - 로컬 PC : 프로젝트 루트의 .env 파일 (gitignore 됨) → 아래 load_dotenv 가 로드
+  - Railway : 대시보드 Service → Variables 에 등록 → 런타임 환경변수로 주입됨
+둘 다 최종적으로는 os.getenv 로 읽으므로 코드 분기가 필요 없다.
+"""
+import os
+
+try:  # 로컬 실행용 .env 로드 (파일이 없거나 미설치면 조용히 건너뜀 — Railway 는 불필요)
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:  # pragma: no cover
+    pass
+
+DB_HOST = os.getenv("ETF_DB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("ETF_DB_PORT", "3306"))
+DB_USER = os.getenv("ETF_DB_USER", "etf")
+DB_PASSWORD = os.getenv("ETF_DB_PASSWORD", "etf1234")
+DB_NAME = os.getenv("ETF_DB_NAME", "etf_db")
+
+DATABASE_URL = (
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
+)
+
+# ---------------------------------------------------------------------------
+# LLM 설정 — 멀티 프로바이더 (anthropic / openai / gemini)
+# ---------------------------------------------------------------------------
+# API 키: 설정된 키가 있는 프로바이더만 사용 가능
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+
+# 전역 기본 프로바이더: auto | anthropic | openai | gemini | none
+#   auto = 키가 설정된 첫 번째 프로바이더 자동 선택 (anthropic → openai → gemini)
+#   none = LLM 미사용 (모든 Agent 규칙기반)
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "auto").lower()
+# 전역 모델 오버라이드 (선택). 비워두면 llm.py 의 DEFAULT_MODELS 가 유일한 기본값이 된다
+# — 기본값을 여기와 llm.py 두 곳에 두면 환경별로 다른 모델이 잡히는 원인이 되므로 금지.
+LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+
+# Agent 별 프로바이더/모델 오버라이드. 형식: "provider" 또는 "provider:model"
+#   예) AGENT_LLM_INPUT=openai:gpt-5.4-mini  AGENT_LLM_EVALUATION=gemini
+# 키: INPUT(입력분석) ACCOUNT(계좌분석) SEARCH(검색) OPTIMIZATION(최적화) EVALUATION(평가)
+AGENT_LLM_OVERRIDES = {
+    key: os.getenv(f"AGENT_LLM_{key}", "").strip()
+    for key in ("INPUT", "ACCOUNT", "SEARCH", "OPTIMIZATION", "EVALUATION")
+}
+
+# 퇴직연금 위험자산 한도 (총 평가금액 대비)
+PENSION_RISK_LIMIT = 0.70
+
+# "말로 입력하기" 텍스트박스에 기본으로 채워지는 실행 가능한 입력 문구.
+# 로컬은 .env, Railway 는 Variables 의 NL_DEFAULT_TEXT 로 변경 (GET /api/config 로 프론트에 전달)
+NL_DEFAULT_TEXT = os.getenv(
+    "NL_DEFAULT_TEXT",
+    "내 연금계좌에서 삼성전자, 삼성전기, 삼성SDI에 나눠 투자하고 싶어",
+)
+
+# ---------------------------------------------------------------------------
+# 실제 DB(etf_integration 등) 기반 ETF 유니버스/분류 규칙
+# ---------------------------------------------------------------------------
+# 연금 매매가능 필터: etf_integration.pension 값이 비어있지 않은 상품만 사용
+UNIVERSE_REQUIRE_PENSION = os.getenv("UNIVERSE_REQUIRE_PENSION", "1") == "1"
+
+# 안전자산(SAFE) 분류 규칙 — fund_type 이 아래 목록이거나, 상품명/벤치마크/키워드에
+# 아래 키워드가 포함되면 SAFE, 그 외는 RISK.
+# 실제 값 분포 확인 후 조정 가능: SELECT fund_type, COUNT(*) FROM etf_integration GROUP BY fund_type;
+SAFE_FUND_TYPES = [
+    s.strip() for s in os.getenv(
+        "SAFE_FUND_TYPES", "채권형,단기금융,금리형,채권혼합형,혼합채권형"
+    ).split(",") if s.strip()
+]
+SAFE_NAME_KEYWORDS = [
+    s.strip() for s in os.getenv(
+        "SAFE_NAME_KEYWORDS",
+        "채권,국고채,국공채,회사채,단기채,종합채,금리,KOFR,CD금리,머니마켓,MMF,단기자금,통안,TDF2025",
+    ).split(",") if s.strip()
+]
+
+# 최적화 후보에 항상 포함할 안전자산 ETF 최대 개수 (시총 상위)
+MAX_SAFE_CANDIDATES = int(os.getenv("MAX_SAFE_CANDIDATES", "10"))

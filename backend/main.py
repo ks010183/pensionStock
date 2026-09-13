@@ -83,6 +83,13 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/api/config")
+def frontend_config():
+    """프론트 초기화용 설정 (환경변수로 조정 가능한 UI 문구 등)."""
+    from backend import config as cfg
+    return {"nl_default_text": cfg.NL_DEFAULT_TEXT}
+
+
 @app.get("/api/health/db")
 def health_db():
     """DB 연결 상태 점검 (문제 발생 시 원인 메시지 반환)."""

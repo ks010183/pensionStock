@@ -39,7 +39,11 @@ export default function App() {
   return (
     <div className="phone">
       <header className="app-header">
-        <h1>연금 ETF 최적화</h1>
+        <h1 className="brand">
+          <span className="brand-main">mPOP</span>
+          <span className="brand-sep">|</span>
+          <span className="brand-sub">JUJU</span>
+        </h1>
         <span className={`badge ${accountType === 'pension' ? 'pension' : ''}`}>
           {accountType === 'pension' ? '퇴직연금 · 위험자산 70%' : '개인연금 · 제한없음'}
         </span>

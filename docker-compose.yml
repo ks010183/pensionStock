@@ -36,6 +36,7 @@ services:
       AGENT_LLM_SEARCH: ${AGENT_LLM_SEARCH:-}
       AGENT_LLM_OPTIMIZATION: ${AGENT_LLM_OPTIMIZATION:-}
       AGENT_LLM_EVALUATION: ${AGENT_LLM_EVALUATION:-gemini:gemini-3.5-flash}
+      NL_DEFAULT_TEXT: ${NL_DEFAULT_TEXT:-}   # 말로 입력하기 기본 문구 (.env 로 변경)
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux 호환 (macOS/Windows 는 기본 제공)
     ports:

@@ -92,6 +92,21 @@ export default function InputScreen({ onSubmit }) {
   const [nlMsgs, setNlMsgs] = useState([])
   const [themeSugs, setThemeSugs] = useState([])
   const [pendingNoWeight, setPendingNoWeight] = useState([])
+  const nlDefaultLoaded = useRef(false)
+
+  // 서버 설정(NL_DEFAULT_TEXT env)에서 기본 실행 가능 문구를 받아 프리필
+  useEffect(() => {
+    if (nlDefaultLoaded.current) return
+    nlDefaultLoaded.current = true
+    fetch('/api/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.nl_default_text) {
+          setNlText(cur => cur.trim() ? cur : d.nl_default_text)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const analyzeNL = async () => {
     if (!nlText.trim()) return
@@ -311,7 +326,7 @@ export default function InputScreen({ onSubmit }) {
           <p className="hint">다시 분석하면 이전 AI 분석 결과는 리셋되고 새로 추가됩니다 (직접 입력분은 유지).</p>
         </div>
         <button className="btn small" onClick={analyzeNL} disabled={nlBusy || !nlText.trim()}>
-          {nlBusy ? '분석 중…' : 'AI로 분석 후 추가'}
+          {nlBusy ? '분석 중…' : '✨ 주주 니즈 분석'}
         </button>
         {nlMsgs.length > 0 && (
           <div style={{ marginTop: 10 }}>
